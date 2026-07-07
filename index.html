@@ -662,8 +662,8 @@
       <div class="sub" id="authCodeSub">Entre le code reçu par courriel</div>
       <div class="field">
         <label>Code à 6 chiffres</label>
-        <input id="auCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000"
-          style="text-align:center; letter-spacing:10px; font-size:24px; font-family:var(--mono); font-weight:600;">
+        <input id="auCode" type="text" inputmode="numeric" maxlength="8" placeholder="••••••"
+          style="text-align:center; letter-spacing:8px; font-size:24px; font-family:var(--mono); font-weight:600;">
       </div>
       <div id="authCodeMsg" style="font-size:12px; color:var(--mint-strong); min-height:16px; margin-bottom:6px;"></div>
       <div class="form-actions">
@@ -2032,7 +2032,7 @@ $('auCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('auCodeV
 $('auCodeVerify').onclick = async () => {
   if (!pendingSignup) return;
   const token = $('auCode').value.trim();
-  if (token.length !== 6) { $('authCodeMsg').style.color = 'var(--red)'; $('authCodeMsg').textContent = 'Entre les 6 chiffres.'; return; }
+  if (token.length < 6) { $('authCodeMsg').style.color = 'var(--red)'; $('authCodeMsg').textContent = 'Entre le code au complet.'; return; }
   $('authCodeMsg').style.color = 'var(--text-dim)';
   $('authCodeMsg').textContent = 'Vérification…';
   const { data, error } = await db.auth.verifyOtp({ email: pendingSignup.email, token, type: 'signup' });
