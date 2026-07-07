@@ -1957,6 +1957,17 @@ initAuth();
 async function ensureProfile() {
   const { data } = await db.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
   profile = data || null;
+  if (!profile) {
+    // comptes créés avant l'écran de code : la fiche profil n'existe pas encore — on la crée
+    const fallback = {
+      id: session.user.id,
+      name: (session.user.email || 'Employé').split('@')[0],
+      team: $('teamSelect').value
+    };
+    const { data: created, error } = await db.from('profiles').insert(fallback).select().single();
+    profile = created || fallback;
+    if (error) console.error('profil auto-créé localement seulement:', error);
+  }
 }
 
 /* ---- Modal auth ---- */
@@ -2159,7 +2170,12 @@ function onPosition(pos) {
   renderTrackPanel();
 }
 function onGeoError(err) {
-  hint('Erreur GPS — vérifie que la localisation est activée');
+  const msgs = {
+    1: 'Localisation refusée — autorise la position dans les réglages du navigateur',
+    2: 'Position indisponible — vérifie que le GPS est activé',
+    3: 'GPS lent — on continue d\'essayer…'
+  };
+  hint(msgs[err && err.code] || 'Erreur GPS — vérifie que la localisation est activée');
 }
 function scheduleSave() {
   if (saveThrottle) return;
@@ -2171,20 +2187,27 @@ function scheduleSave() {
 }
 
 async function startTour() {
-  ensureLiveLayer();
-  const { data, error } = await db.from('tracks').insert({
-    user_id: session.user.id, name: profile.name, team: profile.team, points: []
-  }).select().single();
-  if (error) { hint('Impossible de démarrer la tournée'); console.error(error); return; }
-  currentTrack = { id: data.id, points: [], distanceM: 0, pendingDoors: [], startedAt: data.started_at };
-  dwell = null;
-  if (navigator.geolocation) {
-    watchId = navigator.geolocation.watchPosition(onPosition, onGeoError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
-  } else {
-    hint('Géolocalisation non disponible sur cet appareil');
+  try {
+    if (!session) { openAuthModal(); return; }
+    if (!profile) await ensureProfile();
+    try { ensureLiveLayer(); } catch (e) { console.error('live layer:', e); }
+    const { data, error } = await db.from('tracks').insert({
+      user_id: session.user.id, name: profile.name, team: profile.team, points: []
+    }).select().single();
+    if (error) { hint('Impossible de démarrer la tournée — ' + (error.message || 'erreur base de données')); console.error(error); return; }
+    currentTrack = { id: data.id, points: [], distanceM: 0, pendingDoors: [], startedAt: data.started_at };
+    dwell = null;
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(onPosition, onGeoError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+    } else {
+      hint('Géolocalisation non disponible sur cet appareil');
+    }
+    liveTicker = setInterval(renderTrackPanel, 1000);
+    renderTrackPanel();
+  } catch (e) {
+    hint('Erreur au démarrage de la tournée — réessaie');
+    console.error('startTour:', e);
   }
-  liveTicker = setInterval(renderTrackPanel, 1000);
-  renderTrackPanel();
 }
 
 let reviewDoors = null;
