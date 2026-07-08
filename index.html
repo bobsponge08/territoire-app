@@ -500,6 +500,13 @@
     width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line);
     background: var(--hover); cursor: pointer; font-size: 13px; transition: all 0.2s;
   }
+  .door-addr-input {
+    width: 100%; background: var(--hover); border: 1px solid var(--line);
+    border-radius: 8px; padding: 9px 11px; color: var(--text);
+    font-family: var(--font); font-size: 13.5px; font-weight: 600; outline: none;
+    transition: border-color 0.2s;
+  }
+  .door-addr-input:focus { border-color: var(--mint); }
   .door-btn.confirm:hover { border-color: var(--mint-strong); background: var(--mint-soft); }
   .door-btn.reject:hover { border-color: var(--red); background: rgba(251,113,133,0.12); }
   .recap-card {
@@ -511,6 +518,63 @@
   .recap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .recap-stat .v { font-size: 24px; font-weight: 700; font-family: var(--mono); }
   .recap-stat .k { font-size: 10px; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; }
+
+  /* ============================================================
+     MOBILE — expérience type application iOS (panneaux depuis le bas)
+     ============================================================ */
+  @media (max-width: 680px) {
+    #topbar { flex-wrap: wrap; gap: 8px; top: 8px; left: 8px; right: 8px; }
+    .brand { padding: 9px 13px; border-radius: 14px; }
+    .brand span { display: none; }
+    .brand h1 { font-size: 13px; letter-spacing: 2px; }
+    .spacer { display: none; }
+    #search-wrap { order: 10; width: 100%; padding: 13px 16px; }
+    #searchInput { font-size: 16px; }            /* 16px = pas de zoom auto iOS */
+    .pill { padding: 11px 13px; }
+    .pill.theme-toggle, #undoBtn { display: none; }
+    #topbar .pill .label-mini { display: none; }
+
+    .field input, .field select, .field textarea,
+    .status-opt, #auCode { font-size: 16px; padding: 13px 14px; }
+
+    #dock { left: 8px; right: 8px; bottom: 10px; transform: none; justify-content: space-between; border-radius: 20px; padding: 7px; }
+    .mode-btn { flex: 1; padding: 12px 4px; font-size: 11px; }
+    .mode-btn svg { width: 22px; height: 22px; }
+
+    #panel {
+      top: auto; bottom: 84px; left: 8px; right: 8px; width: auto;
+      max-height: 42vh; border-radius: 20px;
+    }
+    #panel.collapsed { transform: translateY(calc(100% + 84px)); opacity: 1; }
+    #panel-toggle { font-size: 18px; padding: 8px; top: 8px; right: 10px; }
+
+    #form-wrap, #rdv-wrap, #auth-wrap { align-items: flex-end; }
+    #form, #rdv-form, #auth-form {
+      width: 100%; max-width: 100%; max-height: 92vh; overflow-y: auto;
+      border-radius: 26px 26px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+      animation: sheetUp 0.32s cubic-bezier(0.32,1.2,0.5,1);
+    }
+    #track-wrap, #cal-wrap, #dash-wrap { align-items: flex-end; justify-content: center; }
+    #track, #cal, #dash {
+      width: 100%; max-width: 100%; margin: 0; height: auto; max-height: 90vh;
+      border-radius: 26px 26px 0 0;
+      animation: sheetUp 0.32s cubic-bezier(0.32,1.2,0.5,1);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    #trackBody, #dashBody { padding: 16px 18px calc(16px + env(safe-area-inset-bottom)); }
+
+    .btn { padding: 15px; font-size: 14px; }
+    .track-hero .big { font-size: 52px; }
+
+    #form::before, #rdv-form::before, #auth-form::before,
+    #track::before, #cal::before, #dash::before {
+      content: ''; display: block; width: 40px; height: 4px; border-radius: 3px;
+      background: var(--line); margin: -6px auto 14px;
+    }
+    .door-btn { width: 40px; height: 40px; font-size: 16px; }
+    .maplibregl-ctrl-bottom-right { bottom: 78px; }
+  }
+  @keyframes sheetUp { from { transform: translateY(30px); opacity: 0.4; } to { transform: none; opacity: 1; } }
 </style>
 </head>
 <body data-theme="dark">
@@ -1075,11 +1139,18 @@ $('themeToggle').onclick = () => {
   applyPalette();
 };
 
+const isMobile = matchMedia('(max-width: 680px)').matches;
+function updatePanelArrow() {
+  const collapsed = $('panel').classList.contains('collapsed');
+  $('panel-toggle').textContent = isMobile ? (collapsed ? '▲' : '▼') : (collapsed ? '▶' : '◀');
+}
 $('panel-toggle').onclick = () => {
-  const p = $('panel');
-  p.classList.toggle('collapsed');
-  $('panel-toggle').textContent = p.classList.contains('collapsed') ? '▶' : '◀';
+  $('panel').classList.toggle('collapsed');
+  updatePanelArrow();
 };
+// Sur mobile, l'historique est replié par défaut pour laisser voir la carte
+if (isMobile) { $('panel').classList.add('collapsed'); }
+updatePanelArrow();
 
 /* Team selectors */
 const savedTeam = localStorage.getItem('team') || TEAMS[0];
@@ -2208,7 +2279,8 @@ async function startTour() {
     currentTrack = { id: data.id, points: [], distanceM: 0, pendingDoors: [], startedAt: data.started_at };
     dwell = null;
     if (navigator.geolocation) {
-      watchId = navigator.geolocation.watchPosition(onPosition, onGeoError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+      startWatch();
+      requestWakeLock();          // empêche l'écran de s'éteindre pendant la tournée
     } else {
       hint('Géolocalisation non disponible sur cet appareil');
     }
@@ -2220,9 +2292,36 @@ async function startTour() {
   }
 }
 
+function startWatch() {
+  if (watchId != null) navigator.geolocation.clearWatch(watchId);
+  watchId = navigator.geolocation.watchPosition(onPosition, onGeoError,
+    { enableHighAccuracy: true, maximumAge: 3000, timeout: 25000 });
+}
+
+/* --- Wake Lock : garde l'écran allumé tant que la tournée est active --- */
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+  } catch (e) { /* non supporté / refusé : la tournée continue quand même */ }
+}
+function releaseWakeLock() {
+  try { if (wakeLock) { wakeLock.release(); wakeLock = null; } } catch (e) {}
+}
+
+/* Reprise auto quand on revient sur l'onglet (l'app avait été mise en arrière-plan) */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && currentTrack && !currentTrack.endedAt) {
+    startWatch();
+    requestWakeLock();
+  }
+});
+
 let reviewDoors = null;
 async function stopTour() {
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
+  watchId = null;
+  releaseWakeLock();
   clearInterval(liveTicker);
   const endedAt = new Date().toISOString();
   await db.from('tracks').update({
@@ -2279,8 +2378,8 @@ function renderTrackPanel() {
     const rows = reviewDoors.length ? reviewDoors.map(d => `
       <div class="door-row" data-id="${d.id}">
         <div class="door-body">
-          <div class="door-addr">${d.address}</div>
-          <div class="door-time">${new Date(d.detected_at).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})}</div>
+          <input class="door-addr-input" data-id="${d.id}" value="${(d.address || '').replace(/"/g,'&quot;')}" placeholder="Adresse / n° civique">
+          <div class="door-time">Détectée à ${new Date(d.detected_at).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})} · corrige le n° si besoin</div>
         </div>
         <div class="door-actions">
           <button class="door-btn confirm" data-act="confirm" data-id="${d.id}" title="Confirmer">✓</button>
@@ -2293,15 +2392,22 @@ function renderTrackPanel() {
       ${reviewDoors.length ? '<button class="btn btn-primary" id="confirmAllBtn" style="width:100%; margin-top:14px;">TOUT CONFIRMER</button>' : ''}
       <button class="btn btn-ghost" id="seeRecapBtn" style="width:100%; margin-top:10px;">VOIR MON RÉCAP →</button>
     `;
+    const readAddr = id => {
+      const inp = $('trackBody').querySelector(`.door-addr-input[data-id="${id}"]`);
+      return inp ? inp.value.trim() : null;
+    };
     $('trackBody').querySelectorAll('[data-act]').forEach(b => b.onclick = async () => {
       const id = b.dataset.id;
-      await db.from('doors').update({ [b.dataset.act === 'confirm' ? 'confirmed' : 'rejected']: true }).eq('id', id);
+      const patch = b.dataset.act === 'confirm'
+        ? { confirmed: true, address: readAddr(id) }
+        : { rejected: true };
+      await db.from('doors').update(patch).eq('id', id);
       reviewDoors = reviewDoors.filter(d => d.id !== id);
       renderTrackPanel();
     });
     const allBtn = document.getElementById('confirmAllBtn');
     if (allBtn) allBtn.onclick = async () => {
-      await Promise.all(reviewDoors.map(d => db.from('doors').update({ confirmed: true }).eq('id', d.id)));
+      await Promise.all(reviewDoors.map(d => db.from('doors').update({ confirmed: true, address: readAddr(d.id) }).eq('id', d.id)));
       reviewDoors = [];
       renderTrackPanel();
     };
