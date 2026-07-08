@@ -538,29 +538,41 @@
      MOBILE — expérience type application iOS (panneaux depuis le bas)
      ============================================================ */
   @media (max-width: 680px) {
-    #topbar { flex-wrap: wrap; gap: 8px; top: 8px; left: 8px; right: 8px; }
-    .brand { padding: 9px 13px; border-radius: 14px; }
+    /* Barre du haut : 2 rangées nettes, dégagée de l'encoche (safe-area) */
+    #topbar {
+      flex-wrap: wrap; gap: 8px;
+      top: calc(6px + env(safe-area-inset-top));
+      left: 8px; right: 8px; align-items: center;
+    }
+    .brand { padding: 10px 14px; border-radius: 14px; order: 1; }
     .brand span { display: none; }
     .brand h1 { font-size: 13px; letter-spacing: 2px; }
-    .spacer { display: none; }
-    #search-wrap { order: 10; width: 100%; padding: 13px 16px; }
-    #searchInput { font-size: 16px; }            /* 16px = pas de zoom auto iOS */
-    .pill { padding: 11px 13px; }
+    /* Rangée 1 : marque à gauche, icônes poussées à droite */
+    .spacer { display: block; flex: 1 1 auto; order: 2; pointer-events: none; }
+    #trackBtn { order: 3; }
+    #dashBtn { order: 4; }
+    #calBtn  { order: 5; }
+    #trackBtn, #dashBtn, #calBtn { min-width: 46px; justify-content: center; }
+    /* Rangée 2 : équipe + recherche */
+    #topbar > .pill:not([id]) { order: 8; flex: 0 0 auto; }   /* la pastille Équipe (sans id) */
+    #search-wrap { order: 9; flex: 1 1 0; width: auto; min-width: 120px; padding: 13px 16px; }
+    #searchInput { font-size: 16px; }               /* 16px = pas de zoom auto iOS */
+    .pill { padding: 12px 14px; }
     .pill.theme-toggle, #undoBtn { display: none; }
     #topbar .pill .label-mini { display: none; }
 
     .field input, .field select, .field textarea,
     .status-opt, #auCode { font-size: 16px; padding: 13px 14px; }
 
-    #dock { left: 8px; right: 8px; bottom: 10px; transform: none; justify-content: space-between; border-radius: 20px; padding: 7px; }
+    #dock { left: 8px; right: 8px; bottom: calc(10px + env(safe-area-inset-bottom)); transform: none; justify-content: space-between; border-radius: 20px; padding: 7px; }
     .mode-btn { flex: 1; padding: 12px 4px; font-size: 11px; }
     .mode-btn svg { width: 22px; height: 22px; }
 
     #panel {
-      top: auto; bottom: 84px; left: 8px; right: 8px; width: auto;
+      top: auto; bottom: calc(84px + env(safe-area-inset-bottom)); left: 8px; right: 8px; width: auto;
       max-height: 42vh; border-radius: 20px;
     }
-    #panel.collapsed { transform: translateY(calc(100% + 84px)); opacity: 1; }
+    #panel.collapsed { transform: translateY(calc(100% + 84px + env(safe-area-inset-bottom))); opacity: 1; }
     #panel-toggle { font-size: 18px; padding: 8px; top: 8px; right: 10px; }
 
     #form-wrap, #rdv-wrap, #auth-wrap { align-items: flex-end; }
@@ -587,7 +599,7 @@
       background: var(--line); margin: -6px auto 14px;
     }
     .door-btn { width: 40px; height: 40px; font-size: 16px; }
-    .maplibregl-ctrl-bottom-right { bottom: 78px; }
+    .maplibregl-ctrl-bottom-right { bottom: calc(90px + env(safe-area-inset-bottom)); }
   }
   @keyframes sheetUp { from { transform: translateY(30px); opacity: 0.4; } to { transform: none; opacity: 1; } }
 </style>
