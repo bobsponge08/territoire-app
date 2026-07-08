@@ -2415,32 +2415,91 @@ function renderTrackPanel() {
     return;
   }
 
-  // état repos
+  // état repos : prêt à partir + historique de MES tournées
   $('trackSub').textContent = profile ? `${profile.name} · ${profile.team}` : '—';
   $('trackBody').innerHTML = `
-    <div class="track-hero">
+    <div class="track-hero" style="padding:14px 10px 18px;">
       <div class="lbl">PRÊT À PARTIR</div>
     </div>
     <button class="btn btn-primary" id="startTourBtn" style="width:100%;">DÉMARRER MA TOURNÉE</button>
-    <button class="btn btn-ghost" id="logoutBtn" style="width:100%; margin-top:10px;">SE DÉCONNECTER</button>
+    <div class="dash-section-title" style="margin-top:20px;">MES TOURNÉES</div>
+    <div id="myTours"><div class="cal-empty">Chargement…</div></div>
+    <button class="btn btn-ghost" id="logoutBtn" style="width:100%; margin-top:14px;">SE DÉCONNECTER</button>
   `;
   document.getElementById('startTourBtn').onclick = startTour;
   document.getElementById('logoutBtn').onclick = async () => { await db.auth.signOut(); session = null; profile = null; $('track-wrap').classList.remove('show'); };
+  renderMyTours();
 }
 
-async function showRecap() {
-  const { data: confirmedDoors } = await db.from('doors').select('*').eq('track_id', currentTrack.id).eq('confirmed', true);
-  const doors = confirmedDoors || [];
-  const km = (currentTrack.distanceM / 1000).toFixed(2);
-  const durMs = new Date(currentTrack.endedAt).getTime() - new Date(currentTrack.startedAt).getTime();
-  const streets = new Set(doors.map(d => (d.address || '').replace(/^\d+\s*/, '')));
-  map.fitBounds(currentTrack.points.reduce((b, p) => b.extend([p.lng, p.lat]), new maplibregl.LngLatBounds()), { padding: 100, duration: 1200 });
+/* ---- Historique de mes tournées (synchronisé : téléphone ↔ ordinateur) ---- */
+async function renderMyTours() {
+  const box = document.getElementById('myTours');
+  if (!box || !session) return;
+  const [{ data: tracks }, { data: doorRows }] = await Promise.all([
+    db.from('tracks').select('id,started_at,ended_at,distance_m,points,status')
+      .eq('user_id', session.user.id).eq('status', 'done')
+      .order('started_at', { ascending: false }).limit(12),
+    db.from('doors').select('track_id').eq('user_id', session.user.id).eq('confirmed', true)
+  ]);
+  if (!document.getElementById('myTours')) return; // panneau changé entre-temps
+  const doorCount = {};
+  (doorRows || []).forEach(d => { doorCount[d.track_id] = (doorCount[d.track_id] || 0) + 1; });
+  const list = tracks || [];
+  if (!list.length) { box.innerHTML = `<div class="cal-empty">Aucune tournée terminée pour l'instant.</div>`; return; }
+  box.innerHTML = list.map(t => {
+    const d = new Date(t.started_at);
+    const durMs = t.ended_at ? new Date(t.ended_at) - d : 0;
+    return `<div class="visit-card" data-tour="${t.id}" style="cursor:pointer;">
+      <div class="v-name"><span class="v-dot" style="background:#60a5fa; box-shadow:0 0 6px #60a5fa;"></span>
+        ${d.toLocaleDateString('fr-CA', { weekday: 'short', day: 'numeric', month: 'short' })} · ${d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="v-meta">
+        <span><b>${((t.distance_m||0)/1000).toFixed(2)} km</b></span>
+        <span>${fmtDuration(durMs)}</span>
+        <span style="color:var(--mint-strong)"><b>${doorCount[t.id] || 0} porte${(doorCount[t.id]||0)>1?'s':''}</b></span>
+      </div>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('[data-tour]').forEach(el => el.onclick = () => {
+    const t = list.find(x => x.id === el.dataset.tour);
+    if (t) showRecapFor(t, { fresh: false });
+  });
+}
 
-  $('trackSub').textContent = 'Récap de ta tournée';
+/* ---- Tracé d'un trajet sur la carte (marges adaptées au mobile, jamais bloquant) ---- */
+function drawRoute(points) {
+  try {
+    if (!points || !points.length) return;
+    ensureLiveLayer();
+    map.getSource('live-track').setData({ type: 'Feature', properties: {},
+      geometry: { type: 'LineString', coordinates: points.map(p => [p.lng, p.lat]) } });
+    if (points.length === 1) {
+      map.flyTo({ center: [points[0].lng, points[0].lat], zoom: 16.5, duration: 1000 });
+      return;
+    }
+    const b = points.reduce((bb, p) => bb.extend([p.lng, p.lat]), new maplibregl.LngLatBounds());
+    const pad = Math.min(isMobile ? 40 : 100,
+      Math.floor(Math.min(map.getContainer().clientWidth, map.getContainer().clientHeight) / 4));
+    map.fitBounds(b, { padding: Math.max(pad, 20), maxZoom: 16.5, duration: 1200 });
+  } catch (e) { console.error('drawRoute:', e); }
+}
+
+/* ---- Récap (tournée fraîche OU tournée passée) ---- */
+async function showRecapFor(track, opts = {}) {
+  const fresh = !!opts.fresh;
+  const points = track.points || [];
+  const { data: confirmedDoors } = await db.from('doors').select('*').eq('track_id', track.id).eq('confirmed', true);
+  const doors = confirmedDoors || [];
+  const km = ((track.distance_m != null ? track.distance_m : track.distanceM || 0) / 1000).toFixed(2);
+  const start = track.started_at || track.startedAt;
+  const end = track.ended_at || track.endedAt;
+  const durMs = end ? new Date(end) - new Date(start) : 0;
+  const streets = new Set(doors.map(d => (d.address || '').replace(/^\d+[-\d]*\s*/, '').trim()).filter(Boolean));
+
+  $('trackSub').textContent = fresh ? 'Récap de ta tournée' : 'Tournée du ' + new Date(start).toLocaleDateString('fr-CA');
   $('trackBody').innerHTML = `
     <div class="recap-card">
-      <div class="recap-title">🏁 Tournée terminée</div>
-      <div class="recap-date">${new Date(currentTrack.startedAt).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+      <div class="recap-title">🏁 ${fresh ? 'Tournée terminée' : 'Récap de tournée'}</div>
+      <div class="recap-date">${new Date(start).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} · ${new Date(start).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})}</div>
       <div class="recap-grid">
         <div class="recap-stat"><div class="v">${doors.length}</div><div class="k">Portes confirmées</div></div>
         <div class="recap-stat"><div class="v">${km} km</div><div class="k">Distance</div></div>
@@ -2448,9 +2507,36 @@ async function showRecap() {
         <div class="recap-stat"><div class="v">${streets.size}</div><div class="k">Rues parcourues</div></div>
       </div>
     </div>
-    <button class="btn btn-primary" id="newTourBtn" style="width:100%;">NOUVELLE TOURNÉE</button>
+    ${doors.length ? `<div class="dash-section-title">Portes de cette tournée</div>` +
+      doors.map(d => `<div class="door-row"><div class="door-body">
+        <div class="door-addr">${d.address || 'Adresse inconnue'}</div>
+        <div class="door-time">${new Date(d.detected_at).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div></div>`).join('') : ''}
+    <button class="btn btn-primary" id="viewRouteBtn" style="width:100%; margin-top:14px;">🗺 VOIR LE TRAJET SUR LA CARTE</button>
+    ${fresh
+      ? '<button class="btn btn-ghost" id="newTourBtn" style="width:100%; margin-top:10px;">NOUVELLE TOURNÉE</button>'
+      : '<button class="btn btn-ghost" id="backToursBtn" style="width:100%; margin-top:10px;">← RETOUR À MES TOURNÉES</button>'}
   `;
-  document.getElementById('newTourBtn').onclick = () => { currentTrack = null; reviewDoors = null; clearLiveLayers(); renderTrackPanel(); };
+  drawRoute(points); // après le rendu : une erreur carte ne peut plus bloquer l'affichage
+
+  document.getElementById('viewRouteBtn').onclick = () => {
+    drawRoute(points);
+    $('track-wrap').classList.remove('show'); // referme la feuille pour voir la carte
+    hint('Trajet affiché — rouvre 🏃 pour revenir à tes tournées');
+  };
+  const nb = document.getElementById('newTourBtn');
+  if (nb) nb.onclick = () => { currentTrack = null; reviewDoors = null; clearLiveLayers(); renderTrackPanel(); };
+  const bb = document.getElementById('backToursBtn');
+  if (bb) bb.onclick = () => { clearLiveLayers(); renderTrackPanel(); };
+}
+
+// compatibilité : le bouton "VOIR MON RÉCAP →" après une tournée fraîche
+function showRecap() {
+  return showRecapFor({
+    id: currentTrack.id, points: currentTrack.points,
+    distance_m: Math.round(currentTrack.distanceM),
+    started_at: currentTrack.startedAt, ended_at: currentTrack.endedAt
+  }, { fresh: true });
 }
 </script>
 </body>
