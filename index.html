@@ -2068,9 +2068,10 @@ $('auCodeResend').onclick = async () => {
 };
 
 /* ---- Suivi GPS ---- */
-const R_STOP = 15;             // mètres — rayon considéré comme un même arrêt
+const R_STAY = 30;             // m — on reste "au même endroit" tant qu'on est dans ce rayon
+const R_LEAVE = 45;            // m — au-delà, on considère qu'on a vraiment bougé (hystérésis anti-jitter)
 const MIN_DWELL_MS = 20000;    // durée minimale d'arrêt pour compter comme une porte
-const MAX_ACCURACY_M = 45;     // ignore les positions GPS trop imprécises
+const MAX_ACCURACY_M = 75;     // ignore seulement les positions vraiment imprécises
 
 let watchId = null;
 let currentTrack = null;   // { id, points:[], distanceM, pendingDoors:[] }
@@ -2144,15 +2145,24 @@ async function finalizeDoor(lat, lng, ms) {
   refineAddress(data.id, lat, lng);
 }
 
+// Flag une porte dès que l'arrêt dure >= 20 s. Appelée à chaque point GPS ET
+// par un minuteur (1 s), pour que ça marche même si le téléphone n'envoie plus
+// de points pendant qu'on est immobile devant une porte.
+function maybeFlagDoor(now) {
+  if (dwell && !dwell.flagged && (now - dwell.start) >= MIN_DWELL_MS) {
+    dwell.flagged = true;
+    finalizeDoor(dwell.lat, dwell.lng, dwell.start);
+  }
+}
+
 function detectStop(lat, lng, t) {
   if (!dwell) { dwell = { lat, lng, start: t, flagged: false }; return; }
   const d = haversineLL({ lat: dwell.lat, lng: dwell.lng }, { lat, lng });
-  if (d <= R_STOP) {
-    if (!dwell.flagged && (t - dwell.start) >= MIN_DWELL_MS) {
-      dwell.flagged = true;
-      finalizeDoor(dwell.lat, dwell.lng, dwell.start);
-    }
+  if (d <= R_LEAVE) {
+    // toujours autour du point d'arrêt (jitter toléré) — on garde l'ancre d'origine
+    maybeFlagDoor(t);
   } else {
+    // on a vraiment quitté : nouvel arrêt potentiel
     dwell = { lat, lng, start: t, flagged: false };
   }
 }
@@ -2202,7 +2212,7 @@ async function startTour() {
     } else {
       hint('Géolocalisation non disponible sur cet appareil');
     }
-    liveTicker = setInterval(renderTrackPanel, 1000);
+    liveTicker = setInterval(() => { maybeFlagDoor(Date.now()); renderTrackPanel(); }, 1000);
     renderTrackPanel();
   } catch (e) {
     hint('Erreur au démarrage de la tournée — réessaie');
