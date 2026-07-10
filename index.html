@@ -190,6 +190,48 @@
   .empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 12px; line-height: 1.8; }
 
   /* ---------- Hint toast ---------- */
+  /* ---------- Panneau Suggestions ---------- */
+  #suggestPanel {
+    position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%);
+    z-index: 1000; display: none; flex-direction: column; gap: 6px;
+    background: var(--panel); backdrop-filter: blur(16px);
+    border: 1px solid var(--mint); border-radius: 16px;
+    padding: 10px 14px; box-shadow: 0 0 30px rgba(110,231,183,0.2);
+    max-width: min(92vw, 560px);
+  }
+  #suggestPanel.show { display: flex; }
+  #sgCount { font-size: 11.5px; color: var(--text-dim); letter-spacing: 0.5px; }
+  #sgCount b { color: var(--mint); }
+  #sgStreets { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sg-street {
+    padding: 7px 12px; border-radius: 18px; border: 1px solid var(--line);
+    background: var(--hover); color: var(--text); cursor: pointer;
+    font-family: var(--font); font-size: 11.5px; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .sg-street:hover { border-color: var(--mint); color: var(--mint); }
+  .sg-street .n { color: var(--mint-strong); font-family: var(--mono); }
+  .pill.pill-on { border-color: var(--mint); box-shadow: 0 0 18px rgba(110,231,183,0.35); }
+
+  /* ---------- Filtres Trajets ---------- */
+  #tracksFilter {
+    position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%);
+    z-index: 1000; display: none; align-items: center; gap: 6px;
+    background: var(--panel); backdrop-filter: blur(16px);
+    border: 1px solid var(--line); border-radius: 30px;
+    padding: 6px; box-shadow: var(--shadow);
+  }
+  #tracksFilter.show { display: flex; }
+  .tf-chip {
+    padding: 8px 16px; border-radius: 22px; border: 1px solid transparent;
+    background: transparent; color: var(--text-dim); cursor: pointer;
+    font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  .tf-chip:hover { color: var(--text); }
+  .tf-chip.active { background: var(--mint); color: #06251a; }
+  #tfCount { font-size: 11px; color: var(--text-dim); padding: 0 10px; font-family: var(--mono); }
+
   #hint {
     position: absolute; top: 84px; left: 50%; transform: translateX(-50%);
     z-index: 1001; padding: 10px 22px;
@@ -600,6 +642,10 @@
     }
     .door-btn { width: 40px; height: 40px; font-size: 16px; }
     .maplibregl-ctrl-bottom-right { bottom: calc(90px + env(safe-area-inset-bottom)); }
+    #tracksFilter { bottom: calc(96px + env(safe-area-inset-bottom)); width: calc(100% - 24px); justify-content: center; flex-wrap: wrap; }
+    .tf-chip { padding: 10px 14px; flex: 1; text-align: center; }
+    #suggestPanel { bottom: calc(96px + env(safe-area-inset-bottom)); width: calc(100% - 24px); }
+    .sg-street { padding: 10px 12px; }
   }
   @keyframes sheetUp { from { transform: translateY(30px); opacity: 0.4; } to { transform: none; opacity: 1; } }
 </style>
@@ -625,6 +671,9 @@
   <div class="pill">
     <span class="label-mini">Équipe</span>
     <select id="teamSelect"></select>
+  </div>
+  <div class="pill" id="suggestBtn" title="Suggestions : où aller cogner">
+    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
   </div>
   <div class="pill" id="trackBtn" title="Ma tournée">
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2;"><circle cx="13" cy="4" r="2"/><path d="M9 21l2-6 -3-3 1-5 4 2 2 4 3 1M6 21l3-6"/></svg>
@@ -672,6 +721,24 @@
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
     MARQUER ZONE
   </button>
+  <button class="mode-btn" data-mode="tracks">
+    <svg viewBox="0 0 24 24"><path d="M4 20c2-6 5-4 7-9s5-4 9-6"/><circle cx="4" cy="20" r="1.6"/><circle cx="20" cy="5" r="1.6"/></svg>
+    TRAJETS
+  </button>
+</div>
+
+<!-- Panneau Suggestions (cibles) -->
+<div id="suggestPanel">
+  <div id="sgCount"></div>
+  <div id="sgStreets"></div>
+</div>
+
+<!-- Filtres temporels de la couche Trajets -->
+<div id="tracksFilter">
+  <button class="tf-chip active" data-days="7">7 jours</button>
+  <button class="tf-chip" data-days="30">30 jours</button>
+  <button class="tf-chip" data-days="0">Tout</button>
+  <span id="tfCount"></span>
 </div>
 
 <div id="hint"></div>
@@ -1294,6 +1361,228 @@ document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => {
   else if (mode === 'zone') hint('Cliquez pour placer une <span class="k">zone</span>, glissez pour ajuster le rayon', true);
   else hideHint();
   map.getCanvas().style.cursor = cursorFor(mode);
+  // couche Trajets : visible seulement dans son mode
+  if (mode === 'tracks') { $('tracksFilter').classList.add('show'); loadAllTracks(); }
+  else { $('tracksFilter').classList.remove('show'); clearAllTracks(); }
+});
+
+/* ================= Couche TRAJETS (tous les trajets, filtres temporels) ================= */
+let tracksPeriodDays = 7;
+const TEAM_COLORS = (() => {
+  const m = ['match', ['get', 'team']];
+  TEAMS.forEach((t, i) => { m.push(t, `hsl(${Math.round(i * 137.5) % 360}, 65%, 62%)`); });
+  m.push('#60a5fa');
+  return m;
+})();
+
+function ensureAllTracksLayers() {
+  if (map.getSource('all-tracks')) return;
+  map.addSource('all-tracks', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addLayer({ id: 'at-glow', type: 'line', source: 'all-tracks',
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': TEAM_COLORS, 'line-width': 9, 'line-opacity': 0.2, 'line-blur': 3 } });
+  map.addLayer({ id: 'at-line', type: 'line', source: 'all-tracks',
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': TEAM_COLORS, 'line-width': 3.5, 'line-opacity': 0.9 } });
+  map.on('click', 'at-line', e => {
+    if (mode !== 'tracks') return;
+    const p = e.features[0].properties;
+    const d = new Date(p.started_at);
+    if (popup) popup.remove();
+    popup = new maplibregl.Popup({ offset: 10 }).setLngLat(e.lngLat).setHTML(`
+      <div style="font-size:13px; line-height:1.6;">
+        ${p.name ? `<b>${p.name}</b><br>` : ''}
+        <span style="color:${teamColorOf(p.team)}; font-weight:600;">● ${p.team}</span><br>
+        <span style="opacity:0.75; font-size:12px;">${d.toLocaleDateString('fr-CA', { weekday: 'short', day: 'numeric', month: 'short' })} · ${d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})}</span><br>
+        <b style="color:#34d399">${((p.distance_m||0)/1000).toFixed(2)} km</b>
+      </div>`).addTo(map);
+  });
+  map.on('mouseenter', 'at-line', () => { if (mode === 'tracks') map.getCanvas().style.cursor = 'pointer'; });
+  map.on('mouseleave', 'at-line', () => { map.getCanvas().style.cursor = cursorFor(mode); });
+}
+function teamColorOf(team) {
+  const i = TEAMS.indexOf(team);
+  return i >= 0 ? `hsl(${Math.round(i * 137.5) % 360}, 65%, 62%)` : '#60a5fa';
+}
+function clearAllTracks() {
+  if (map.getSource('all-tracks')) map.getSource('all-tracks').setData({ type: 'FeatureCollection', features: [] });
+  $('tfCount').textContent = '';
+}
+
+async function loadAllTracks() {
+  try { ensureAllTracksLayers(); } catch (e) { console.error(e); return; }
+  spin(true);
+  try {
+    const isMgr = profile && profile.role === 'manager';
+    // manager : table nominative ; employé/anonyme : vue anonymisée
+    let q = db.from(isMgr ? 'tracks' : 'tracks_anon')
+      .select(isMgr ? 'id,team,name,started_at,ended_at,distance_m,points,status' : '*')
+      .eq('status', 'done')
+      .order('started_at', { ascending: false })
+      .limit(500);
+    if (tracksPeriodDays > 0) {
+      q = q.gte('started_at', new Date(Date.now() - tracksPeriodDays * 86400000).toISOString());
+    }
+    const { data, error } = await q;
+    if (error) { hint('Impossible de charger les trajets'); console.error(error); return; }
+    const feats = (data || [])
+      .filter(t => Array.isArray(t.points) && t.points.length > 1)
+      .map(t => ({
+        type: 'Feature',
+        properties: { id: t.id, team: t.team, name: t.name || '', started_at: t.started_at, distance_m: t.distance_m },
+        geometry: { type: 'LineString', coordinates: t.points.map(p => [p.lng, p.lat]) }
+      }));
+    map.getSource('all-tracks').setData({ type: 'FeatureCollection', features: feats });
+    $('tfCount').textContent = feats.length + ' trajet' + (feats.length > 1 ? 's' : '');
+    if (feats.length) {
+      const b = new maplibregl.LngLatBounds();
+      feats.forEach(f => f.geometry.coordinates.forEach(c => b.extend(c)));
+      const pad = Math.max(20, Math.min(isMobile ? 40 : 80,
+        Math.floor(Math.min(map.getContainer().clientWidth, map.getContainer().clientHeight) / 4)));
+      try { map.fitBounds(b, { padding: pad, maxZoom: 15, duration: 1000 }); } catch (e) {}
+      hint(`${feats.length} trajet${feats.length>1?'s':''} affiché${feats.length>1?'s':''} — cliquez un trajet pour les détails`);
+    } else {
+      hint('Aucun trajet terminé sur cette période');
+    }
+  } finally { spin(false); }
+}
+
+document.querySelectorAll('.tf-chip').forEach(c => c.onclick = () => {
+  document.querySelectorAll('.tf-chip').forEach(x => x.classList.remove('active'));
+  c.classList.add('active');
+  tracksPeriodDays = parseInt(c.dataset.days);
+  loadAllTracks();
+});
+
+/* ================= SUGGESTIONS — où aller cogner (scoring KPI) ================= */
+let suggestOn = false;
+let suggestTimer = null;
+
+function ensureSuggestLayers() {
+  if (map.getSource('suggests')) return;
+  map.addSource('suggests', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addLayer({ id: 'sg-dots', type: 'circle', source: 'suggests',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 2.5, 16, 6, 18, 9],
+      'circle-color': ['interpolate', ['linear'], ['get', 'score'],
+        55, 'rgba(110,231,183,0.25)',
+        70, 'rgba(110,231,183,0.55)',
+        85, '#6ee7b7',
+        95, '#a7f3d0'],
+      'circle-stroke-width': ['case', ['>=', ['get', 'score'], 85], 1.5, 0],
+      'circle-stroke-color': '#ffffff'
+    } });
+  map.on('click', 'sg-dots', e => {
+    const p = e.features[0].properties;
+    const why = [];
+    if (p.annee && p.annee < 1983) why.push(`construite en ${p.annee} (isolation d'époque)`);
+    else if (p.annee) why.push(`construite en ${p.annee}`);
+    if (p.cubf == 1000) why.push('unifamiliale');
+    if (p.etages == 1) why.push('plain-pied (grenier accessible)');
+    if (popup) popup.remove();
+    popup = new maplibregl.Popup({ offset: 10 }).setLngLat(e.lngLat).setHTML(`
+      <div style="font-size:13px; line-height:1.6;">
+        <b>${p.civic || ''} ${p.rue || ''}</b>
+        <span style="float:right; background:var(--mint-soft); color:var(--mint-strong); border-radius:12px; padding:1px 8px; font-weight:700; font-family:var(--mono);">${p.score}</span><br>
+        <span style="opacity:0.75; font-size:12px;">${why.join(' · ') || '—'}</span><br>
+        <span style="opacity:0.75; font-size:12px;">Valeur : ${p.val_tot ? (+p.val_tot).toLocaleString('fr-CA') + ' $' : '—'}${p.logements > 1 ? ' · ' + p.logements + ' logements' : ''}</span>
+      </div>`).addTo(map);
+  });
+  map.on('mouseenter', 'sg-dots', () => { if (suggestOn) map.getCanvas().style.cursor = 'pointer'; });
+  map.on('mouseleave', 'sg-dots', () => { map.getCanvas().style.cursor = cursorFor(mode); });
+}
+
+// centres des visites avec ventes (effet de pairs)
+function salesCenters() {
+  const pts = [];
+  for (const v of visits) {
+    if (!v.sales) continue;
+    if (v.kind === 'zone') pts.push({ lat: v.geometry.lat, lng: v.geometry.lng });
+    else if (v.geometry.coords && v.geometry.coords[0] && v.geometry.coords[0].length) {
+      const seg = v.geometry.coords[0];
+      const mid = seg[Math.floor(seg.length / 2)];
+      pts.push({ lat: mid[0], lng: mid[1] });
+    }
+  }
+  return pts;
+}
+// rues déjà marquées « passé » (à exclure des top rues)
+function visitedStreetNames() {
+  return new Set(visits.filter(v => v.kind === 'street' && v.name)
+    .map(v => v.name.toLowerCase()));
+}
+
+async function loadSuggestions() {
+  if (!suggestOn) return;
+  if (map.getZoom() < 12.5) {
+    $('sgCount').innerHTML = 'Zoomez sur un secteur pour voir les <b>maisons cibles</b>';
+    $('sgStreets').innerHTML = '';
+    if (map.getSource('suggests')) map.getSource('suggests').setData({ type: 'FeatureCollection', features: [] });
+    return;
+  }
+  const b = map.getBounds();
+  const { data, error } = await db.from('properties')
+    .select('civic,rue,annee,cubf,etages,logements,val_tot,score,lat,lng')
+    .gte('lat', b.getSouth()).lte('lat', b.getNorth())
+    .gte('lng', b.getWest()).lte('lng', b.getEast())
+    .gte('score', 55)
+    .order('score', { ascending: false })
+    .limit(4000);
+  if (error) { console.error(error); return; }
+  const centers = salesCenters();
+  const feats = (data || []).map(p => {
+    let s = p.score;
+    // effet de pairs : bonus si une vente interne à < 400 m
+    if (centers.some(c => haversine({ lat: p.lat, lng: p.lng }, c) < 400)) s = Math.min(100, s + 8);
+    return { type: 'Feature',
+      properties: { ...p, score: s },
+      geometry: { type: 'Point', coordinates: [p.lng, p.lat] } };
+  });
+  map.getSource('suggests').setData({ type: 'FeatureCollection', features: feats });
+
+  // top rues du secteur (non encore marquées « passé »)
+  const done = visitedStreetNames();
+  const byStreet = {};
+  feats.forEach(f => {
+    const r = f.properties.rue;
+    if (!r) return;
+    if ([...done].some(d => r.toLowerCase().includes(d) || d.includes(r.toLowerCase()))) return;
+    byStreet[r] = byStreet[r] || { n: 0, sum: 0, lats: 0, lngs: 0 };
+    const e = byStreet[r];
+    e.n += 1; e.sum += f.properties.score;
+    e.lats += f.geometry.coordinates[1]; e.lngs += f.geometry.coordinates[0];
+  });
+  const top = Object.entries(byStreet)
+    .map(([rue, e]) => ({ rue, n: e.n, avg: e.sum / e.n, lat: e.lats / e.n, lng: e.lngs / e.n }))
+    .filter(s => s.n >= 8)
+    .sort((a, b) => b.avg - a.avg || b.n - a.n)
+    .slice(0, 5);
+  $('sgCount').innerHTML = `🎯 <b>${feats.length}</b> maison${feats.length>1?'s':''} cible${feats.length>1?'s':''} dans ce secteur — les plus brillantes d'abord`;
+  $('sgStreets').innerHTML = top.map((s, i) =>
+    `<button class="sg-street" data-i="${i}">${s.rue} <span class="n">${Math.round(s.avg)} · ${s.n} maisons</span></button>`).join('');
+  $('sgStreets').querySelectorAll('.sg-street').forEach(el => el.onclick = () => {
+    const s = top[+el.dataset.i];
+    map.flyTo({ center: [s.lng, s.lat], zoom: 16.2, duration: 1400 });
+  });
+}
+
+$('suggestBtn').onclick = () => {
+  suggestOn = !suggestOn;
+  $('suggestBtn').classList.toggle('pill-on', suggestOn);
+  $('suggestPanel').classList.toggle('show', suggestOn);
+  if (suggestOn) {
+    try { ensureSuggestLayers(); } catch (e) { console.error(e); }
+    loadSuggestions();
+    hint('Points <span class="k">menthe</span> = maisons à fort potentiel (âge, type, valeur). Cliquez-en un pour les détails.');
+  } else {
+    if (map.getSource('suggests')) map.getSource('suggests').setData({ type: 'FeatureCollection', features: [] });
+    hideHint();
+  }
+};
+map.on('moveend', () => {
+  if (!suggestOn) return;
+  clearTimeout(suggestTimer);
+  suggestTimer = setTimeout(loadSuggestions, 600);
 });
 
 /* ================= Draft ================= */
@@ -2028,6 +2317,79 @@ function renderDashboard() {
   $('dashBody').innerHTML = kpis +
     `<div class="dash-section-title">Ventes par équipe</div>${bars}` +
     `<div class="dash-section-title">Meilleurs secteurs</div>${sectors}`;
+  renderManagerSection();
+}
+
+/* ---- Section manager : performance par employé (invisible aux employés) ---- */
+function dateInDashPeriod(dateStr) { return inDashPeriod({ visited_at: dateStr }); }
+
+async function renderManagerSection() {
+  if (!session || !profile || profile.role !== 'manager') return;
+  const holder = document.createElement('div');
+  holder.id = 'mgrSection';
+  holder.innerHTML = `<div class="dash-section-title">👥 Employés — vue manager</div><div class="cal-empty">Chargement…</div>`;
+  $('dashBody').appendChild(holder);
+
+  const [{ data: allTracks, error: te }, { data: allDoors }, { data: profs }] = await Promise.all([
+    db.from('tracks').select('id,user_id,name,team,started_at,ended_at,distance_m,points,status')
+      .eq('status', 'done').order('started_at', { ascending: false }).limit(1000),
+    db.from('doors').select('user_id,detected_at').eq('confirmed', true),
+    db.from('profiles').select('id,name,team,role')
+  ]);
+  if (te) { holder.querySelector('.cal-empty').textContent = 'Erreur de chargement (accès manager requis).'; return; }
+  if (!document.getElementById('mgrSection')) return; // dashboard re-rendu entre-temps
+
+  const tr = (allTracks || []).filter(t => dateInDashPeriod(t.started_at));
+  const dr = (allDoors || []).filter(d => dateInDashPeriod(d.detected_at));
+
+  const by = {};
+  (profs || []).filter(p => p.role !== 'manager').forEach(p => {
+    by[p.id] = { name: p.name, team: p.team, tours: 0, km: 0, doors: 0, last: null, tracks: [] };
+  });
+  tr.forEach(t => {
+    const e = by[t.user_id] || (by[t.user_id] = { name: t.name, team: t.team, tours: 0, km: 0, doors: 0, last: null, tracks: [] });
+    e.tours += 1; e.km += (t.distance_m || 0) / 1000;
+    if (!e.last || t.started_at > e.last) e.last = t.started_at;
+    e.tracks.push(t);
+  });
+  dr.forEach(d => { if (by[d.user_id]) by[d.user_id].doors += 1; });
+
+  const rows = Object.entries(by)
+    .map(([id, e]) => ({ id, ...e }))
+    .sort((a, b) => b.doors - a.doors || b.km - a.km);
+
+  holder.innerHTML = `<div class="dash-section-title">👥 Employés — vue manager</div>` +
+    (rows.length ? rows.map(e => `
+      <div class="dash-sector-row emp-row" data-emp="${e.id}" style="cursor:${e.tracks.length ? 'pointer' : 'default'};">
+        <span class="v-dot" style="background:${teamColorOf(e.team)}; box-shadow:0 0 6px ${teamColorOf(e.team)}"></span>
+        <div style="flex:1;">
+          <div class="dash-sector-name">${e.name}</div>
+          <div class="dash-sector-meta">${e.team} · ${e.tours} tournée${e.tours>1?'s':''} · ${e.km.toFixed(1)} km${e.last ? ' · vu le ' + new Date(e.last).toLocaleDateString('fr-CA') : ''}</div>
+        </div>
+        <div class="dash-sector-sales">${e.doors} 🚪</div>
+      </div>`).join('')
+    : `<div class="cal-empty">Aucun employé avec activité sur cette période.</div>`);
+
+  const empMap = Object.fromEntries(rows.map(e => [e.id, e]));
+  holder.querySelectorAll('.emp-row').forEach(el => el.onclick = () => {
+    const e = empMap[el.dataset.emp];
+    if (!e || !e.tracks.length) return;
+    // dessine les trajets de cet employé sur la carte
+    try { ensureAllTracksLayers(); } catch (err) { return; }
+    const feats = e.tracks
+      .filter(t => Array.isArray(t.points) && t.points.length > 1)
+      .map(t => ({ type: 'Feature',
+        properties: { id: t.id, team: t.team, name: t.name, started_at: t.started_at, distance_m: t.distance_m },
+        geometry: { type: 'LineString', coordinates: t.points.map(p => [p.lng, p.lat]) } }));
+    map.getSource('all-tracks').setData({ type: 'FeatureCollection', features: feats });
+    $('dash-wrap').classList.remove('show');
+    if (feats.length) {
+      const b = new maplibregl.LngLatBounds();
+      feats.forEach(f => f.geometry.coordinates.forEach(c => b.extend(c)));
+      try { map.fitBounds(b, { padding: 60, maxZoom: 15.5, duration: 1000 }); } catch (err) {}
+    }
+    hint(`Trajets de <span class="k">${e.name}</span> affichés — mode Trajets pour tout revoir`);
+  });
 }
 
 $('dashBtn').onclick = () => { $('dash-wrap').classList.add('show'); renderDashboard(); };
