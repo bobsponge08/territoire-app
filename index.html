@@ -190,6 +190,119 @@
   .empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 12px; line-height: 1.8; }
 
   /* ---------- Hint toast ---------- */
+  /* ---------- Page d'accueil ---------- */
+  #landing {
+    position: absolute; inset: 0; z-index: 3000;
+    background: #06090b; overflow: hidden;
+    display: none; align-items: center; justify-content: center;
+  }
+  #landing.show { display: flex; }
+  #landing.leaving { animation: ldLeave 0.6s ease forwards; }
+  @keyframes ldLeave { to { opacity: 0; transform: scale(1.04); visibility: hidden; } }
+  .ld-halo {
+    position: absolute; width: 130vmax; height: 130vmax; border-radius: 50%;
+    background: radial-gradient(circle, rgba(110,231,183,0.13) 0%, rgba(110,231,183,0.05) 30%, transparent 60%);
+    animation: ldPulse 5s ease-in-out infinite;
+  }
+  @keyframes ldPulse { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.12); opacity: 1; } }
+  .ld-grid {
+    position: absolute; inset: -50%;
+    background-image:
+      linear-gradient(rgba(110,231,183,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110,231,183,0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    transform: perspective(600px) rotateX(28deg);
+    animation: ldGrid 24s linear infinite;
+  }
+  @keyframes ldGrid { to { background-position: 0 560px, 560px 0; } }
+  .ld-inner {
+    position: relative; z-index: 2; text-align: center;
+    max-width: 660px; padding: 40px 26px calc(40px + env(safe-area-inset-bottom));
+    max-height: 100%; overflow-y: auto;
+  }
+  .ld-anim { opacity: 0; animation: ldUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards; animation-delay: calc(var(--d) * 0.15s + 0.1s); }
+  @keyframes ldUp { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+  .ld-logo {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-size: 15px; font-weight: 700; letter-spacing: 6px; color: var(--mint);
+    margin-bottom: 30px;
+  }
+  #landing h1 {
+    font-size: clamp(34px, 7vw, 56px); font-weight: 700; line-height: 1.1;
+    color: #e7f0ea; letter-spacing: -0.5px;
+  }
+  #landing h1 em {
+    font-style: normal;
+    background: linear-gradient(100deg, #6ee7b7, #a7f3d0 55%, #34d399);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .ld-sub {
+    font-size: clamp(14px, 2.4vw, 16.5px); line-height: 1.75; color: #8b98a5;
+    max-width: 540px; margin: 20px auto 0;
+  }
+  .ld-stats { display: flex; justify-content: center; gap: 14px; margin-top: 30px; flex-wrap: wrap; }
+  .ld-stat {
+    background: rgba(18,24,32,0.8); border: 1px solid rgba(110,231,183,0.25);
+    border-radius: 16px; padding: 14px 22px; min-width: 128px;
+    box-shadow: 0 0 30px rgba(110,231,183,0.08);
+  }
+  .ld-stat .v { font-size: 26px; font-weight: 700; font-family: var(--mono); color: var(--mint); }
+  .ld-stat .k { font-size: 10px; letter-spacing: 1.4px; color: #8b98a5; text-transform: uppercase; margin-top: 3px; }
+  .ld-feats { display: flex; gap: 12px; margin-top: 28px; text-align: left; }
+  .ld-feat {
+    flex: 1; background: rgba(18,24,32,0.6); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 14px; font-size: 11.5px; line-height: 1.55; color: #8b98a5;
+  }
+  .ld-feat span { font-size: 19px; display: block; margin-bottom: 6px; }
+  .ld-feat b { display: block; color: #e7f0ea; font-size: 12.5px; margin-bottom: 3px; }
+  .ld-ctas { display: flex; gap: 12px; margin-top: 32px; justify-content: center; flex-wrap: wrap; }
+  .ld-ctas .btn { flex: none; padding: 15px 30px; font-size: 13.5px; }
+  .ld-ctas .btn-primary { box-shadow: 0 6px 34px rgba(110,231,183,0.45); }
+  .ld-ctas .btn-ghost { color: #8b98a5; }
+  @media (max-width: 680px) {
+    .ld-feats { flex-direction: column; }
+    .ld-ctas .btn { flex: 1; width: 100%; }
+    .ld-stats { gap: 8px; }
+    .ld-stat { flex: 1; min-width: 96px; padding: 12px 10px; }
+  }
+
+  /* ---------- Profil (style Strava) ---------- */
+  .pf-head { display: flex; align-items: center; gap: 14px; padding: 6px 2px 16px; }
+  .pf-avatar {
+    width: 58px; height: 58px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; letter-spacing: 1px;
+    border: 2px solid; font-family: var(--font);
+  }
+  .pf-id { flex: 1; min-width: 0; }
+  .pf-name { font-size: 19px; font-weight: 700; }
+  .pf-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; display: flex; align-items: center; gap: 8px; }
+  .pf-badge {
+    background: var(--mint); color: #06251a; border-radius: 10px;
+    padding: 1px 8px; font-size: 9.5px; font-weight: 800; letter-spacing: 1px;
+  }
+  .pf-edit {
+    background: var(--hover); border: 1px solid var(--line); border-radius: 10px;
+    color: var(--text-dim); width: 36px; height: 36px; cursor: pointer; font-size: 15px;
+    transition: all 0.2s;
+  }
+  .pf-edit:hover { color: var(--mint); border-color: var(--mint); }
+  .pf-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 16px; }
+  .pf-stat {
+    background: var(--hover); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 8px; text-align: center;
+  }
+  .pf-stat .v { font-size: 22px; font-weight: 700; font-family: var(--mono); color: var(--mint-strong); }
+  .pf-stat .k { font-size: 9.5px; letter-spacing: 1.2px; color: var(--text-dim); text-transform: uppercase; margin-top: 3px; }
+  .pf-weeks { display: flex; gap: 6px; align-items: flex-end; height: 74px; padding: 0 2px; }
+  .pf-week { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .pf-week-fill {
+    width: 100%; border-radius: 5px 5px 2px 2px;
+    background: rgba(110,231,183,0.35); min-height: 4px;
+    transition: height 0.5s cubic-bezier(0.34,1.2,0.64,1);
+  }
+  .pf-week-lbl { font-size: 8.5px; color: var(--text-dim); margin-top: 4px; font-family: var(--mono); }
+
   /* ---------- Panneau Suggestions ---------- */
   #suggestPanel {
     position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%);
@@ -651,6 +764,38 @@
 </style>
 </head>
 <body data-theme="dark">
+
+<!-- ============ Page d'accueil ============ -->
+<div id="landing">
+  <div class="ld-halo"></div>
+  <div class="ld-grid"></div>
+  <div class="ld-inner">
+    <div class="ld-logo ld-anim" style="--d:0;">
+      <svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z" fill="none" stroke="#6ee7b7" stroke-width="1.6"/><circle cx="12" cy="9" r="2.6" fill="#6ee7b7"/></svg>
+      <span>TERRITOIRE</span>
+    </div>
+    <h1 class="ld-anim" style="--d:1;">Arrêtez de deviner.<br><em>Sachez où cogner.</em></h1>
+    <p class="ld-sub ld-anim" style="--d:2;">
+      Vous ne pouvez plus deviner où sera votre prochaine vente.
+      TERRITOIRE croise le rôle d'évaluation foncière, vos territoires et vos tournées GPS
+      pour pointer vos équipes vers les bonnes portes — avant tout le monde.
+    </p>
+    <div class="ld-stats ld-anim" style="--d:3;">
+      <div class="ld-stat"><div class="v" data-count="404197">0</div><div class="k">maisons analysées</div></div>
+      <div class="ld-stat"><div class="v" data-count="39">0</div><div class="k">villes couvertes</div></div>
+      <div class="ld-stat"><div class="v" data-count="10">0</div><div class="k">KPI par adresse</div></div>
+    </div>
+    <div class="ld-feats ld-anim" style="--d:4;">
+      <div class="ld-feat"><span>🎯</span><b>Ciblage par données</b>Année de construction, valeur, type — chaque maison a un score.</div>
+      <div class="ld-feat"><span>🗺</span><b>Territoires en direct</b>Fini les rues refaites deux fois. 20 équipes, une seule carte.</div>
+      <div class="ld-feat"><span>🏃</span><b>Tournées GPS</b>Vos portes détectées automatiquement. Votre journée, votre récap.</div>
+    </div>
+    <div class="ld-ctas ld-anim" style="--d:5;">
+      <button class="btn btn-primary" id="ldEnter">ENTRER DANS LA CARTE →</button>
+      <button class="btn btn-ghost" id="ldLogin">J'ai déjà un compte</button>
+    </div>
+  </div>
+</div>
 
 <div id="map"></div>
 
@@ -1430,13 +1575,14 @@ async function loadAllTracks() {
       .map(t => ({
         type: 'Feature',
         properties: { id: t.id, team: t.team, name: t.name || '', started_at: t.started_at, distance_m: t.distance_m },
-        geometry: { type: 'LineString', coordinates: t.points.map(p => [p.lng, p.lat]) }
-      }));
+        geometry: { type: 'MultiLineString', coordinates: splitSegments(t.points) }
+      }))
+      .filter(f => f.geometry.coordinates.length);
     map.getSource('all-tracks').setData({ type: 'FeatureCollection', features: feats });
     $('tfCount').textContent = feats.length + ' trajet' + (feats.length > 1 ? 's' : '');
     if (feats.length) {
       const b = new maplibregl.LngLatBounds();
-      feats.forEach(f => f.geometry.coordinates.forEach(c => b.extend(c)));
+      feats.forEach(f => f.geometry.coordinates.forEach(seg => seg.forEach(c => b.extend(c))));
       const pad = Math.max(20, Math.min(isMobile ? 40 : 80,
         Math.floor(Math.min(map.getContainer().clientWidth, map.getContainer().clientHeight) / 4)));
       try { map.fitBounds(b, { padding: pad, maxZoom: 15, duration: 1000 }); } catch (e) {}
@@ -2380,12 +2526,13 @@ async function renderManagerSection() {
       .filter(t => Array.isArray(t.points) && t.points.length > 1)
       .map(t => ({ type: 'Feature',
         properties: { id: t.id, team: t.team, name: t.name, started_at: t.started_at, distance_m: t.distance_m },
-        geometry: { type: 'LineString', coordinates: t.points.map(p => [p.lng, p.lat]) } }));
+        geometry: { type: 'MultiLineString', coordinates: splitSegments(t.points) } }))
+      .filter(f => f.geometry.coordinates.length);
     map.getSource('all-tracks').setData({ type: 'FeatureCollection', features: feats });
     $('dash-wrap').classList.remove('show');
     if (feats.length) {
       const b = new maplibregl.LngLatBounds();
-      feats.forEach(f => f.geometry.coordinates.forEach(c => b.extend(c)));
+      feats.forEach(f => f.geometry.coordinates.forEach(seg => seg.forEach(c => b.extend(c))));
       try { map.fitBounds(b, { padding: 60, maxZoom: 15.5, duration: 1000 }); } catch (err) {}
     }
     hint(`Trajets de <span class="k">${e.name}</span> affichés — mode Trajets pour tout revoir`);
@@ -2411,8 +2558,34 @@ async function initAuth() {
   const { data } = await db.auth.getSession();
   session = data.session;
   if (session) await ensureProfile();
+  else showLanding(); // pas connecté → page d'accueil
 }
 initAuth();
+
+/* ---- Page d'accueil ---- */
+function showLanding() {
+  const ld = $('landing');
+  ld.classList.add('show');
+  // compteurs animés
+  ld.querySelectorAll('[data-count]').forEach(el => {
+    const target = +el.dataset.count;
+    const t0 = performance.now(), dur = 1800;
+    function tick(t) {
+      const p = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased).toLocaleString('fr-CA');
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    setTimeout(() => requestAnimationFrame(tick), 600);
+  });
+}
+function hideLanding() {
+  const ld = $('landing');
+  ld.classList.add('leaving');
+  setTimeout(() => { ld.classList.remove('show', 'leaving'); }, 650);
+}
+$('ldEnter').onclick = hideLanding;
+$('ldLogin').onclick = () => { hideLanding(); setTimeout(openAuthModal, 400); };
 
 async function ensureProfile() {
   const { data } = await db.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
@@ -2632,7 +2805,13 @@ function onPosition(pos) {
   if (accuracy && accuracy > MAX_ACCURACY_M) return;
   const t = pos.timestamp || Date.now();
   const prev = currentTrack.points[currentTrack.points.length - 1];
-  if (prev) currentTrack.distanceM += haversineLL({ lat: prev.lat, lng: prev.lng }, { lat, lng });
+  if (prev) {
+    const d = haversineLL({ lat: prev.lat, lng: prev.lng }, { lat, lng });
+    const dt = Math.max(1, (t - prev.t) / 1000);
+    // anti-gribouillis : rejette les sauts GPS impossibles (>40 m/s ≈ 144 km/h)
+    if (d / dt > 40) return;
+    currentTrack.distanceM += d;
+  }
   currentTrack.points.push({ lat, lng, t });
   updateLiveLine();
   detectStop(lat, lng, t);
@@ -2752,6 +2931,7 @@ $('trackBtn').onclick = async () => {
 
 function renderTrackPanel() {
   $('trackBadge').textContent = currentTrack && !currentTrack.endedAt ? '●' : '';
+  $('trackTitle').textContent = 'MA TOURNÉE';
   if (!session) { $('trackSub').textContent = '—'; return; }
 
   if (currentTrack && !currentTrack.endedAt) {
@@ -2812,7 +2992,8 @@ function renderTrackPanel() {
     return;
   }
 
-  // état repos : prêt à partir + historique de MES tournées
+  // état repos : PROFIL style Strava (avatar, stats, activités)
+  $('trackTitle').textContent = 'MON PROFIL';
   $('trackSub').textContent = profile ? `${profile.name} · ${profile.team}` : '—';
   const installTip = (IS_IOS && !IS_STANDALONE) ? `
     <div class="install-tip">
@@ -2820,35 +3001,111 @@ function renderTrackPanel() {
       Dans Safari : bouton <b>Partager</b> <span class="ios-share">⎋</span> → <b>« Sur l'écran d'accueil »</b>.
       L'app s'ouvre plein écran et la permission de localisation reste mémorisée.
     </div>` : '';
+  const initials = (profile?.name || '?').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const isMgr = profile?.role === 'manager';
   $('trackBody').innerHTML = `
     ${installTip}
-    <div class="track-hero" style="padding:14px 10px 18px;">
-      <div class="lbl">PRÊT À PARTIR</div>
+    <div class="pf-head">
+      <div class="pf-avatar" style="background:${teamColorOf(profile?.team)}22; color:${teamColorOf(profile?.team)}; border-color:${teamColorOf(profile?.team)};">${initials}</div>
+      <div class="pf-id">
+        <div class="pf-name">${profile?.name || '—'}</div>
+        <div class="pf-meta">${profile?.team || ''} ${isMgr ? '<span class="pf-badge">MANAGER</span>' : ''}</div>
+      </div>
+      <button class="pf-edit" id="pfEditBtn" title="Modifier mon profil">✎</button>
     </div>
-    <button class="btn btn-primary" id="startTourBtn" style="width:100%;">DÉMARRER MA TOURNÉE</button>
-    <div class="dash-section-title" style="margin-top:20px;">MES TOURNÉES</div>
+    <div id="pfEditForm" style="display:none; margin-bottom:14px;">
+      <div class="field-row">
+        <div class="field"><label>Prénom</label><input id="pfName" type="text" value="${profile?.name || ''}"></div>
+        <div class="field"><label>Équipe</label><select id="pfTeam">${TEAMS.map(t => `<option ${t === profile?.team ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      </div>
+      <button class="btn btn-primary" id="pfSaveBtn" style="width:100%; padding:10px;">ENREGISTRER</button>
+    </div>
+    <button class="btn btn-primary" id="startTourBtn" style="width:100%;">▶ DÉMARRER MA TOURNÉE</button>
+    <div class="pf-stats" id="pfStats">
+      <div class="pf-stat"><div class="v">—</div><div class="k">Tournées</div></div>
+      <div class="pf-stat"><div class="v">—</div><div class="k">Kilomètres</div></div>
+      <div class="pf-stat"><div class="v">—</div><div class="k">Portes</div></div>
+    </div>
+    <div class="dash-section-title">8 dernières semaines</div>
+    <div class="pf-weeks" id="pfWeeks"></div>
+    <div class="dash-section-title">Mes activités</div>
     <div id="myTours"><div class="cal-empty">Chargement…</div></div>
     <button class="btn btn-ghost" id="logoutBtn" style="width:100%; margin-top:14px;">SE DÉCONNECTER</button>
   `;
   document.getElementById('startTourBtn').onclick = startTour;
-  document.getElementById('logoutBtn').onclick = async () => { await db.auth.signOut(); session = null; profile = null; $('track-wrap').classList.remove('show'); };
+  document.getElementById('logoutBtn').onclick = async () => {
+    await db.auth.signOut();
+    session = null; profile = null;
+    $('track-wrap').classList.remove('show');
+    showLanding();
+  };
+  document.getElementById('pfEditBtn').onclick = () => {
+    const f = document.getElementById('pfEditForm');
+    f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  };
+  document.getElementById('pfSaveBtn').onclick = async () => {
+    const name = document.getElementById('pfName').value.trim();
+    const team = document.getElementById('pfTeam').value;
+    if (!name) return;
+    const { error } = await db.from('profiles').update({ name, team }).eq('id', session.user.id);
+    if (error) { hint('Erreur de mise à jour du profil'); return; }
+    profile.name = name; profile.team = team;
+    localStorage.setItem('team', team);
+    $('teamSelect').value = team;
+    renderTrackPanel();
+    hint('<span class="k">✓</span> Profil mis à jour');
+  };
   renderMyTours();
 }
 
-/* ---- Historique de mes tournées (synchronisé : téléphone ↔ ordinateur) ---- */
+/* ---- Profil : stats cumulées, barres hebdo, activités (sync téléphone ↔ ordi) ---- */
 async function renderMyTours() {
   const box = document.getElementById('myTours');
   if (!box || !session) return;
   const [{ data: tracks }, { data: doorRows }] = await Promise.all([
     db.from('tracks').select('id,started_at,ended_at,distance_m,points,status')
       .eq('user_id', session.user.id).eq('status', 'done')
-      .order('started_at', { ascending: false }).limit(12),
+      .order('started_at', { ascending: false }).limit(100),
     db.from('doors').select('track_id').eq('user_id', session.user.id).eq('confirmed', true)
   ]);
   if (!document.getElementById('myTours')) return; // panneau changé entre-temps
   const doorCount = {};
   (doorRows || []).forEach(d => { doorCount[d.track_id] = (doorCount[d.track_id] || 0) + 1; });
   const list = tracks || [];
+
+  // stats cumulées (style Strava)
+  const stats = document.getElementById('pfStats');
+  if (stats) {
+    const totKm = list.reduce((s, t) => s + (+t.distance_m || 0), 0) / 1000;
+    const totDoors = (doorRows || []).length;
+    stats.innerHTML = `
+      <div class="pf-stat"><div class="v">${list.length}</div><div class="k">Tournées</div></div>
+      <div class="pf-stat"><div class="v">${totKm.toFixed(1)}</div><div class="k">Kilomètres</div></div>
+      <div class="pf-stat"><div class="v">${totDoors}</div><div class="k">Portes</div></div>`;
+  }
+  // barres des 8 dernières semaines (km)
+  const weeks = document.getElementById('pfWeeks');
+  if (weeks) {
+    const now = new Date();
+    const monday = new Date(now); monday.setDate(now.getDate() - ((now.getDay() + 6) % 7)); monday.setHours(0,0,0,0);
+    const buckets = Array.from({ length: 8 }, (_, i) => {
+      const start = new Date(monday); start.setDate(monday.getDate() - (7 - i) * 7);
+      const end = new Date(start); end.setDate(start.getDate() + 7);
+      return { start, end, km: 0 };
+    });
+    list.forEach(t => {
+      const d = new Date(t.started_at);
+      const b = buckets.find(b => d >= b.start && d < b.end);
+      if (b) b.km += (+t.distance_m || 0) / 1000;
+    });
+    const maxKm = Math.max(0.1, ...buckets.map(b => b.km));
+    weeks.innerHTML = buckets.map((b, i) => `
+      <div class="pf-week" title="${b.km.toFixed(1)} km">
+        <div class="pf-week-fill" style="height:${Math.max(4, b.km / maxKm * 100)}%; ${i === 7 ? 'background:var(--mint);' : ''}"></div>
+        <div class="pf-week-lbl">${b.start.getDate()}/${b.start.getMonth() + 1}</div>
+      </div>`).join('');
+  }
+
   if (!list.length) { box.innerHTML = `<div class="cal-empty">Aucune tournée terminée pour l'instant.</div>`; return; }
   box.innerHTML = list.map(t => {
     const d = new Date(t.started_at);
@@ -2870,12 +3127,31 @@ async function renderMyTours() {
 }
 
 /* ---- Tracé d'un trajet sur la carte (marges adaptées au mobile, jamais bloquant) ---- */
+// Découpe un trajet en segments aux sauts GPS aberrants (>200 m) —
+// évite les « gribouillis » : jamais de ligne tracée à travers la ville.
+function splitSegments(points) {
+  const segs = [];
+  let cur = [];
+  for (const p of points) {
+    if (cur.length) {
+      const prev = cur[cur.length - 1];
+      if (haversine({ lat: prev[1], lng: prev[0] }, { lat: p.lat, lng: p.lng }) > 200) {
+        if (cur.length > 1) segs.push(cur);
+        cur = [];
+      }
+    }
+    cur.push([p.lng, p.lat]);
+  }
+  if (cur.length > 1) segs.push(cur);
+  return segs;
+}
+
 function drawRoute(points) {
   try {
     if (!points || !points.length) return;
     ensureLiveLayer();
     map.getSource('live-track').setData({ type: 'Feature', properties: {},
-      geometry: { type: 'LineString', coordinates: points.map(p => [p.lng, p.lat]) } });
+      geometry: { type: 'MultiLineString', coordinates: splitSegments(points) } });
     if (points.length === 1) {
       map.flyTo({ center: [points[0].lng, points[0].lat], zoom: 16.5, duration: 1000 });
       return;
