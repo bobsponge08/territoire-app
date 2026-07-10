@@ -194,76 +194,193 @@
   #landing {
     position: absolute; inset: 0; z-index: 3000;
     background: #06090b; overflow: hidden;
-    display: none; align-items: center; justify-content: center;
+    display: none;
   }
-  #landing.show { display: flex; }
+  #landing.show { display: block; }
   #landing.leaving { animation: ldLeave 0.6s ease forwards; }
   @keyframes ldLeave { to { opacity: 0; transform: scale(1.04); visibility: hidden; } }
   .ld-halo {
-    position: absolute; width: 130vmax; height: 130vmax; border-radius: 50%;
-    background: radial-gradient(circle, rgba(110,231,183,0.13) 0%, rgba(110,231,183,0.05) 30%, transparent 60%);
-    animation: ldPulse 5s ease-in-out infinite;
+    position: absolute; top: -40vmax; left: 50%; transform: translateX(-50%);
+    width: 120vmax; height: 120vmax; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(110,231,183,0.12) 0%, rgba(110,231,183,0.04) 30%, transparent 60%);
+    animation: ldPulse 6s ease-in-out infinite;
   }
-  @keyframes ldPulse { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.12); opacity: 1; } }
+  @keyframes ldPulse { 0%,100% { opacity: 0.8; } 50% { opacity: 1; } }
   .ld-grid {
-    position: absolute; inset: -50%;
+    position: absolute; inset: 0; pointer-events: none;
     background-image:
-      linear-gradient(rgba(110,231,183,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(110,231,183,0.05) 1px, transparent 1px);
+      linear-gradient(rgba(110,231,183,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110,231,183,0.04) 1px, transparent 1px);
     background-size: 56px 56px;
-    transform: perspective(600px) rotateX(28deg);
-    animation: ldGrid 24s linear infinite;
+    mask-image: linear-gradient(to bottom, black, transparent 70%);
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent 70%);
   }
-  @keyframes ldGrid { to { background-position: 0 560px, 560px 0; } }
-  .ld-inner {
-    position: relative; z-index: 2; text-align: center;
-    max-width: 660px; padding: 40px 26px calc(40px + env(safe-area-inset-bottom));
-    max-height: 100%; overflow-y: auto;
+  .ld-scroll {
+    position: relative; z-index: 2; height: 100%;
+    overflow-y: auto; overscroll-behavior: contain;
+    padding: 0 max(24px, env(safe-area-inset-left)) env(safe-area-inset-bottom);
   }
-  .ld-anim { opacity: 0; animation: ldUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards; animation-delay: calc(var(--d) * 0.15s + 0.1s); }
+  .ld-nav {
+    max-width: 1060px; margin: 0 auto; padding: 22px 0 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .ld-logo { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; letter-spacing: 5px; color: var(--mint); }
+  .ld-nav-login { padding: 10px 20px !important; font-size: 12px !important; flex: none !important; width: auto !important; }
+
+  .ld-anim { opacity: 0; animation: ldUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards; animation-delay: calc(var(--d) * 0.14s + 0.1s); }
   @keyframes ldUp { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
-  .ld-logo {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-size: 15px; font-weight: 700; letter-spacing: 6px; color: var(--mint);
-    margin-bottom: 30px;
+
+  .ld-hero {
+    max-width: 1060px; margin: 0 auto; padding: 72px 0 40px;
+    display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: center;
+  }
+  .ld-eyebrow {
+    display: inline-block; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--mint); border: 1px solid rgba(110,231,183,0.35); border-radius: 30px;
+    padding: 7px 16px; margin-bottom: 22px; background: rgba(110,231,183,0.06);
   }
   #landing h1 {
-    font-size: clamp(34px, 7vw, 56px); font-weight: 700; line-height: 1.1;
-    color: #e7f0ea; letter-spacing: -0.5px;
+    font-size: clamp(36px, 5.4vw, 62px); font-weight: 700; line-height: 1.06;
+    color: #e7f0ea; letter-spacing: -1px;
   }
-  #landing h1 em {
+  #landing h1 em, #landing h2 em {
     font-style: normal;
     background: linear-gradient(100deg, #6ee7b7, #a7f3d0 55%, #34d399);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .ld-sub {
-    font-size: clamp(14px, 2.4vw, 16.5px); line-height: 1.75; color: #8b98a5;
-    max-width: 540px; margin: 20px auto 0;
-  }
-  .ld-stats { display: flex; justify-content: center; gap: 14px; margin-top: 30px; flex-wrap: wrap; }
-  .ld-stat {
-    background: rgba(18,24,32,0.8); border: 1px solid rgba(110,231,183,0.25);
-    border-radius: 16px; padding: 14px 22px; min-width: 128px;
-    box-shadow: 0 0 30px rgba(110,231,183,0.08);
-  }
-  .ld-stat .v { font-size: 26px; font-weight: 700; font-family: var(--mono); color: var(--mint); }
-  .ld-stat .k { font-size: 10px; letter-spacing: 1.4px; color: #8b98a5; text-transform: uppercase; margin-top: 3px; }
-  .ld-feats { display: flex; gap: 12px; margin-top: 28px; text-align: left; }
-  .ld-feat {
-    flex: 1; background: rgba(18,24,32,0.6); border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 14px; padding: 14px; font-size: 11.5px; line-height: 1.55; color: #8b98a5;
-  }
-  .ld-feat span { font-size: 19px; display: block; margin-bottom: 6px; }
-  .ld-feat b { display: block; color: #e7f0ea; font-size: 12.5px; margin-bottom: 3px; }
-  .ld-ctas { display: flex; gap: 12px; margin-top: 32px; justify-content: center; flex-wrap: wrap; }
-  .ld-ctas .btn { flex: none; padding: 15px 30px; font-size: 13.5px; }
-  .ld-ctas .btn-primary { box-shadow: 0 6px 34px rgba(110,231,183,0.45); }
+  .ld-sub { font-size: clamp(15px, 1.8vw, 17.5px); line-height: 1.75; color: #8b98a5; max-width: 520px; margin-top: 22px; }
+  .ld-ctas { display: flex; gap: 12px; margin-top: 34px; flex-wrap: wrap; }
+  .ld-ctas .btn { flex: none; padding: 16px 32px; font-size: 13.5px; }
+  .ld-ctas .btn-primary { box-shadow: 0 6px 34px rgba(110,231,183,0.4); }
   .ld-ctas .btn-ghost { color: #8b98a5; }
-  @media (max-width: 680px) {
-    .ld-feats { flex-direction: column; }
-    .ld-ctas .btn { flex: 1; width: 100%; }
-    .ld-stats { gap: 8px; }
-    .ld-stat { flex: 1; min-width: 96px; padding: 12px 10px; }
+
+  .ld-hero-visual {
+    background: rgba(16,22,29,0.7); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 22px; padding: 18px; box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+  }
+  .ld-hero-visual svg { width: 100%; height: auto; display: block; }
+  .ld-route { stroke-dasharray: 620; stroke-dashoffset: 620; animation: ldRoute 3.2s ease 0.9s forwards; }
+  @keyframes ldRoute { to { stroke-dashoffset: 0; } }
+  .ld-route-end { opacity: 0; animation: ldPop 0.5s ease 3.8s forwards; }
+  @keyframes ldPop { from { opacity: 0; r: 2; } to { opacity: 1; r: 7; } }
+  .ld-pins circle { opacity: 0; animation: ldPin 0.4s ease forwards; }
+  .ld-pins circle:nth-child(1) { animation-delay: 1.6s; }
+  .ld-pins circle:nth-child(2) { animation-delay: 2.1s; }
+  .ld-pins circle:nth-child(3) { animation-delay: 2.6s; }
+  .ld-pins circle:nth-child(4) { animation-delay: 3.1s; }
+  @keyframes ldPin { from { opacity: 0; } to { opacity: 1; } }
+
+  .ld-band {
+    max-width: 1060px; margin: 20px auto 0;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 30px 0;
+  }
+  .ld-stat { text-align: center; }
+  .ld-stat .v { font-size: clamp(24px, 3vw, 34px); font-weight: 700; font-family: var(--mono); color: var(--mint); }
+  .ld-stat .k { font-size: 10.5px; letter-spacing: 1.6px; color: #8b98a5; text-transform: uppercase; margin-top: 5px; }
+
+  .ld-section { max-width: 1060px; margin: 0 auto; padding: 90px 0 10px; }
+  #landing h2 {
+    font-size: clamp(26px, 3.6vw, 40px); font-weight: 700; line-height: 1.15;
+    color: #e7f0ea; letter-spacing: -0.5px; text-align: center; margin-bottom: 44px;
+  }
+  .ld-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .ld-cards-4 { grid-template-columns: repeat(4, 1fr); }
+  .ld-card {
+    background: rgba(16,22,29,0.7); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 18px; padding: 26px 22px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .ld-card:hover { border-color: rgba(110,231,183,0.4); transform: translateY(-3px); }
+  .ld-ic { width: 26px; height: 26px; stroke: var(--mint); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 16px; }
+  .ld-card b { display: block; color: #e7f0ea; font-size: 15.5px; margin-bottom: 8px; }
+  .ld-card p { font-size: 13px; line-height: 1.7; color: #8b98a5; }
+
+  .ld-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .ld-step {
+    position: relative; padding: 26px 22px 26px 24px;
+    background: rgba(16,22,29,0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px;
+  }
+  .ld-step .n {
+    font-family: var(--mono); font-size: 40px; font-weight: 700;
+    color: rgba(110,231,183,0.25); line-height: 1; margin-bottom: 12px;
+  }
+  .ld-step b { display: block; color: #e7f0ea; font-size: 15.5px; margin-bottom: 8px; }
+  .ld-step p { font-size: 13px; line-height: 1.7; color: #8b98a5; }
+
+  .ld-quote { max-width: 720px; margin: 0 auto; padding: 100px 0 20px; text-align: center; }
+  .ld-quote p {
+    font-size: clamp(20px, 2.6vw, 28px); line-height: 1.5; color: #cfe0d7; font-weight: 500;
+  }
+  .ld-final { text-align: center; padding: 90px 0 30px; }
+  .ld-final .ld-ctas { justify-content: center; }
+  .ld-footer {
+    max-width: 1060px; margin: 60px auto 0;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding: 26px 0 40px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    font-size: 11.5px; color: #5c6a75; letter-spacing: 0.5px;
+  }
+
+  /* révélation au défilement */
+  .rv { opacity: 0; transform: translateY(30px); transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+  .rv.on { opacity: 1; transform: none; }
+
+  @media (max-width: 860px) {
+    .ld-hero { grid-template-columns: 1fr; padding-top: 44px; gap: 34px; }
+    .ld-band { grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    .ld-cards, .ld-cards-4, .ld-steps { grid-template-columns: 1fr; }
+    .ld-section { padding-top: 64px; }
+    .ld-ctas .btn { flex: 1; }
+  }
+
+  /* ---------- Éditeur de trajet ---------- */
+  .seg-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 10px; border-radius: 12px; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.2s;
+  }
+  .seg-row:hover { background: var(--hover); }
+  .seg-row.seg-off { opacity: 0.55; }
+  .seg-row.seg-off .seg-name { text-decoration: line-through; }
+  .seg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .seg-body { flex: 1; }
+  .seg-name { font-size: 13.5px; font-weight: 600; }
+  .seg-time { font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
+  .seg-toggle {
+    font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    padding: 5px 10px; border-radius: 20px;
+    background: var(--mint-soft); color: var(--mint-strong);
+    border: 1px solid var(--mint-strong);
+  }
+  .seg-toggle:not(.on) { background: rgba(251,113,133,0.12); color: var(--red); border-color: var(--red); }
+
+  /* ---------- Recherche active : l'historique s'efface ---------- */
+  body.searching #panel { opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  #search-wrap { z-index: 1300; }
+  #search-results { z-index: 1400; }
+
+  /* ---------- Pas connecté : aucune donnée d'entreprise visible ---------- */
+  body.no-session #panel { display: none; }
+  body.no-session #calBtn, body.no-session #dashBtn, body.no-session #suggestBtn { opacity: 0.45; }
+
+  /* ---------- Point de position en direct ---------- */
+  .live-pos { position: relative; width: 22px; height: 22px; }
+  .live-pos-dot {
+    position: absolute; inset: 4px; border-radius: 50%;
+    background: #4da6ff; border: 2.5px solid #fff;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  }
+  .live-pos-ring {
+    position: absolute; inset: -6px; border-radius: 50%;
+    background: rgba(77,166,255,0.35);
+    animation: posPulse 2s ease-out infinite;
+  }
+  @keyframes posPulse {
+    0% { transform: scale(0.6); opacity: 0.9; }
+    70% { transform: scale(1.6); opacity: 0; }
+    100% { transform: scale(1.6); opacity: 0; }
   }
 
   /* ---------- Profil (style Strava) ---------- */
@@ -273,6 +390,15 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 22px; font-weight: 700; letter-spacing: 1px;
     border: 2px solid; font-family: var(--font);
+  }
+  .pf-avatar { position: relative; cursor: pointer; overflow: hidden; }
+  .pf-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .pf-avatar-cam {
+    position: absolute; right: -2px; bottom: -2px;
+    background: var(--panel-solid); border: 1px solid var(--line);
+    border-radius: 50%; width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim);
   }
   .pf-id { flex: 1; min-width: 0; }
   .pf-name { font-size: 19px; font-weight: 700; }
@@ -707,7 +833,8 @@
     #trackBtn { order: 3; }
     #dashBtn { order: 4; }
     #calBtn  { order: 5; }
-    #trackBtn, #dashBtn, #calBtn { min-width: 46px; justify-content: center; }
+    #profileBtn { order: 6; }
+    #trackBtn, #dashBtn, #calBtn, #profileBtn { min-width: 46px; justify-content: center; }
     /* Rangée 2 : équipe + recherche */
     #topbar > .pill:not([id]) { order: 8; flex: 0 0 auto; }   /* la pastille Équipe (sans id) */
     #search-wrap { order: 9; flex: 1 1 0; width: auto; min-width: 120px; padding: 13px 16px; }
@@ -769,31 +896,127 @@
 <div id="landing">
   <div class="ld-halo"></div>
   <div class="ld-grid"></div>
-  <div class="ld-inner">
-    <div class="ld-logo ld-anim" style="--d:0;">
-      <svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z" fill="none" stroke="#6ee7b7" stroke-width="1.6"/><circle cx="12" cy="9" r="2.6" fill="#6ee7b7"/></svg>
-      <span>TERRITOIRE</span>
-    </div>
-    <h1 class="ld-anim" style="--d:1;">Arrêtez de deviner.<br><em>Sachez où cogner.</em></h1>
-    <p class="ld-sub ld-anim" style="--d:2;">
-      Vous ne pouvez plus deviner où sera votre prochaine vente.
-      TERRITOIRE croise le rôle d'évaluation foncière, vos territoires et vos tournées GPS
-      pour pointer vos équipes vers les bonnes portes — avant tout le monde.
-    </p>
-    <div class="ld-stats ld-anim" style="--d:3;">
-      <div class="ld-stat"><div class="v" data-count="404197">0</div><div class="k">maisons analysées</div></div>
+  <div class="ld-scroll">
+
+    <nav class="ld-nav">
+      <div class="ld-logo">
+        <svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z" fill="none" stroke="#6ee7b7" stroke-width="1.6"/><circle cx="12" cy="9" r="2.6" fill="#6ee7b7"/></svg>
+        <span>TERRITOIRE</span>
+      </div>
+      <button class="btn btn-ghost ld-nav-login" id="ldLogin">Se connecter</button>
+    </nav>
+
+    <header class="ld-hero">
+      <div class="ld-hero-text">
+        <div class="ld-eyebrow ld-anim" style="--d:0;">Plateforme de vente porte-à-porte</div>
+        <h1 class="ld-anim" style="--d:1;">Arrêtez de deviner.<br><em>Sachez où frapper.</em></h1>
+        <p class="ld-sub ld-anim" style="--d:2;">
+          Vos meilleures ventes vous attendent derrière des portes précises.
+          TERRITOIRE croise le rôle d'évaluation foncière, vos territoires
+          et vos tournées GPS pour y mener vos équipes — avant la concurrence.
+        </p>
+        <div class="ld-ctas ld-anim" style="--d:3;">
+          <button class="btn btn-primary" id="ldEnter">Entrer dans la carte</button>
+          <button class="btn btn-ghost" id="ldCreate">Créer un compte</button>
+        </div>
+      </div>
+      <div class="ld-hero-visual ld-anim" style="--d:3;">
+        <svg viewBox="0 0 420 320" fill="none">
+          <g stroke="rgba(110,231,183,0.14)" stroke-width="1">
+            <path d="M0 60h420M0 130h420M0 200h420M0 270h420"/>
+            <path d="M70 0v320M160 0v320M250 0v320M340 0v320"/>
+          </g>
+          <path class="ld-route" d="M40 280 L160 200 L160 130 L250 130 L250 60 L370 40"
+            stroke="#6ee7b7" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="40" cy="280" r="7" fill="#6ee7b7"/>
+          <circle class="ld-route-end" cx="370" cy="40" r="7" fill="#fff"/>
+          <g class="ld-pins" fill="#34d399">
+            <circle cx="160" cy="200" r="4.5"/><circle cx="160" cy="130" r="4.5"/>
+            <circle cx="250" cy="130" r="4.5"/><circle cx="250" cy="60" r="4.5"/>
+          </g>
+        </svg>
+      </div>
+    </header>
+
+    <section class="ld-band">
+      <div class="ld-stat"><div class="v" data-count="404197">0</div><div class="k">propriétés analysées</div></div>
       <div class="ld-stat"><div class="v" data-count="39">0</div><div class="k">villes couvertes</div></div>
-      <div class="ld-stat"><div class="v" data-count="10">0</div><div class="k">KPI par adresse</div></div>
-    </div>
-    <div class="ld-feats ld-anim" style="--d:4;">
-      <div class="ld-feat"><span>🎯</span><b>Ciblage par données</b>Année de construction, valeur, type — chaque maison a un score.</div>
-      <div class="ld-feat"><span>🗺</span><b>Territoires en direct</b>Fini les rues refaites deux fois. 20 équipes, une seule carte.</div>
-      <div class="ld-feat"><span>🏃</span><b>Tournées GPS</b>Vos portes détectées automatiquement. Votre journée, votre récap.</div>
-    </div>
-    <div class="ld-ctas ld-anim" style="--d:5;">
-      <button class="btn btn-primary" id="ldEnter">ENTRER DANS LA CARTE →</button>
-      <button class="btn btn-ghost" id="ldLogin">J'ai déjà un compte</button>
-    </div>
+      <div class="ld-stat"><div class="v" data-count="20">0</div><div class="k">équipes coordonnées</div></div>
+      <div class="ld-stat"><div class="v" data-count="10">0</div><div class="k">indicateurs par adresse</div></div>
+    </section>
+
+    <section class="ld-section">
+      <h2 class="rv">Le porte-à-porte à l'aveugle<br>vous coûte cher. Chaque jour.</h2>
+      <div class="ld-cards">
+        <div class="ld-card rv">
+          <svg viewBox="0 0 24 24" class="ld-ic"><path d="M17 2l4 4-4 4M21 6H8a5 5 0 0 0 0 10h2M7 22l-4-4 4-4M3 18h9"/></svg>
+          <b>Des rues refaites deux fois</b>
+          <p>Marre de repasser aux mêmes maisons pendant que vos vrais clients attendent trois rues plus loin ? Sans carte partagée, chaque équipe recommence le travail d'une autre.</p>
+        </div>
+        <div class="ld-card rv">
+          <svg viewBox="0 0 24 24" class="ld-ic"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          <b>Des rendez-vous qui s'échappent</b>
+          <p>Un rendez-vous noté sur un bout de papier, c'est une vente offerte au concurrent. Chaque oubli efface des heures de terrain.</p>
+        </div>
+        <div class="ld-card rv">
+          <svg viewBox="0 0 24 24" class="ld-ic"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 6-6" stroke-dasharray="3 3"/></svg>
+          <b>Aucune trace du terrain</b>
+          <p>Qui a couvert quoi, quand, avec quels résultats ? Sans données, impossible de savoir où retourner — et où ne plus perdre son temps.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="ld-section">
+      <h2 class="rv">Une seule carte.<br><em>Toute votre opération.</em></h2>
+      <div class="ld-cards ld-cards-4">
+        <div class="ld-card rv">
+          <svg viewBox="0 0 24 24" class="ld-ic"><path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 7v13M15 4v13"/></svg>
+          <b>Territoires en temps réel</b>
+          <p>Rues et zones marquées, visibles par les 20 équipes à la seconde. Une rue faite est une rue faite — pour tout le monde.</p>
+        </div>
+        <div class="ld-card rv">
+          <svg viewBox="0 0 24 24" class="ld-ic"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          <b>Tournées GPS automatiques</b>
+          <p>Le téléphone trace la tournée, détecte chaque porte où l'on s'arrête, et produit un récap : distance, portes, rues couvertes.</p>
+        </div>
+        <div class="ld-card rv">
+          <svg viewBox="0 0 24 24" class="ld-ic"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>
+          <b>Ciblage par données publiques</b>
+          <p>Année de construction, valeur, superficie, type : chaque adresse reçoit un score. Vos équipes frappent d'abord aux portes à fort potentiel.</p>
+        </div>
+        <div class="ld-card rv">
+          <svg viewBox="0 0 24 24" class="ld-ic"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 15h3"/></svg>
+          <b>Rendez-vous d'équipe</b>
+          <p>Chaque rendez-vous est daté, localisé sur la carte et visible par tous. Le manager sait qui l'a pris, et personne ne l'oublie.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="ld-section">
+      <h2 class="rv">Opérationnel en une journée.</h2>
+      <div class="ld-steps">
+        <div class="ld-step rv"><div class="n">1</div><b>Créez vos comptes</b><p>Chaque vendeur s'inscrit en 30 secondes et rejoint son équipe. Les managers voient tout, les équipes voient l'essentiel.</p></div>
+        <div class="ld-step rv"><div class="n">2</div><b>Marquez le terrain</b><p>Rues faites, zones couvertes, secteurs à refaire : la carte devient la mémoire collective de l'entreprise.</p></div>
+        <div class="ld-step rv"><div class="n">3</div><b>Suivez et ciblez</b><p>Tournées GPS, tableaux de performance et suggestions d'adresses : chaque journée s'appuie sur les données de la veille.</p></div>
+      </div>
+    </section>
+
+    <section class="ld-quote rv">
+      <p>« Chaque rue marquée est une heure sauvée<br>pour les dix-neuf autres équipes. »</p>
+    </section>
+
+    <section class="ld-final rv">
+      <h2>Vos concurrents devinent encore.<br><em>Plus vous.</em></h2>
+      <div class="ld-ctas">
+        <button class="btn btn-primary" id="ldEnter2">Entrer dans la carte</button>
+      </div>
+    </section>
+
+    <footer class="ld-footer">
+      <span>TERRITOIRE — Cartographie des ventes</span>
+      <span>Fait au Québec · Données foncières publiques (donneesquebec.ca)</span>
+    </footer>
+
   </div>
 </div>
 
@@ -823,6 +1046,10 @@
   <div class="pill" id="trackBtn" title="Ma tournée">
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2;"><circle cx="13" cy="4" r="2"/><path d="M9 21l2-6 -3-3 1-5 4 2 2 4 3 1M6 21l3-6"/></svg>
     <span id="trackBadge"></span>
+  </div>
+  <div class="pill" id="profileBtn" title="Mon profil">
+    <span id="profileBtnAvatar" style="display:none;"></span>
+    <svg id="profileBtnIcon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2;"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
   </div>
   <div class="pill" id="dashBtn" title="Tableau de bord des ventes">
     <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2;"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
@@ -1406,6 +1633,9 @@ const searchInput = $('searchInput');
 const searchResults = $('search-results');
 let searchTimer = null, searchMarker = null;
 
+// pendant la recherche : on masque l'historique pour voir ce qu'on tape et les suggestions
+searchInput.addEventListener('focus', () => document.body.classList.add('searching'));
+searchInput.addEventListener('blur', () => setTimeout(() => document.body.classList.remove('searching'), 250));
 searchInput.addEventListener('input', () => {
   clearTimeout(searchTimer);
   const q = searchInput.value.trim();
@@ -1498,6 +1728,8 @@ function goToResult(r) {
 let mode = 'explore';
 const cursorFor = m => m === 'explore' ? '' : 'crosshair';
 document.querySelectorAll('.mode-btn').forEach(b => b.onclick = () => {
+  // marquer / voir les trajets exige d'être connecté
+  if (!session && b.dataset.mode !== 'explore') { openAuthModal(); return; }
   document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('active'));
   b.classList.add('active');
   mode = b.dataset.mode;
@@ -1713,6 +1945,7 @@ async function loadSuggestions() {
 }
 
 $('suggestBtn').onclick = () => {
+  if (!session) { openAuthModal(); return; }
   suggestOn = !suggestOn;
   $('suggestBtn').classList.toggle('pill-on', suggestOn);
   $('suggestPanel').classList.toggle('show', suggestOn);
@@ -2114,13 +2347,37 @@ function renderHistory() {
 }
 
 /* ================= Load + realtime ================= */
+// Rien n'est chargé sans connexion : les données de l'entreprise sont privées.
 async function load() {
+  if (!(await hasSession())) { visits = []; renderHistory(); return; }
   const { data, error } = await db.from('visits').select('*').order('visited_at', { ascending: false });
   if (error) { hint('Impossible de charger les données'); console.error(error); return; }
   visits = data || [];
   if (styleReady) ensureVisitLayers();
   else map.once('style.load', ensureVisitLayers);
   renderHistory();
+}
+async function hasSession() {
+  if (session) return true;
+  const { data } = await db.auth.getSession();
+  session = data.session;
+  return !!session;
+}
+// vide tout à la déconnexion / affiche tout à la connexion
+function refreshAllData() {
+  load();
+  loadAppointments();
+  document.body.classList.toggle('no-session', !session);
+}
+function clearAllData() {
+  visits = [];
+  appointments = [];
+  ensureVisitLayers();
+  renderHistory();
+  updateCalBadge();
+  clearLiveLayers();
+  if (typeof clearAllTracks === 'function') try { clearAllTracks(); } catch (e) {}
+  document.body.classList.add('no-session');
 }
 load();
 
@@ -2147,6 +2404,7 @@ const DOWS = ['L','M','M','J','V','S','D'];
 const dayKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
 async function loadAppointments() {
+  if (!(await hasSession())) { appointments = []; updateCalBadge(); return; }
   const { data, error } = await db.from('appointments').select('*').order('at');
   if (!error) {
     appointments = data || [];
@@ -2290,7 +2548,7 @@ function renderDayListRdv() {
       <div class="rdv-time">${t.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})}</div>
       <div class="rdv-body">
         <div class="rdv-title"><span class="v-dot" style="background:${apptColor(a)}; box-shadow:0 0 6px ${apptColor(a)}"></span> ${a.title}</div>
-        <div class="rdv-meta"><b>${a.team}</b>${a.notes ? ' · ' + a.notes : ''}</div>
+        <div class="rdv-meta">pris par <b>${a.created_by || '?'}</b> · <b style="color:${teamColorOf(a.team)}">${a.team}</b>${a.notes ? ' · ' + a.notes : ''}</div>
         ${a.address ? `<div class="rdv-addr" data-id="${a.id}">📍 ${a.address}</div>` : ''}
       </div>
       <button class="rdv-del" data-id="${a.id}" title="Supprimer">✕</button>
@@ -2329,7 +2587,7 @@ function renderDayListActivity() {
   $('calList').innerHTML = summary + cards;
 }
 
-$('calBtn').onclick = () => { $('cal-wrap').classList.add('show'); renderCalendar(); };
+$('calBtn').onclick = () => { if (!session) { openAuthModal(); return; } $('cal-wrap').classList.add('show'); renderCalendar(); };
 $('calClose').onclick = () => $('cal-wrap').classList.remove('show');
 $('cal-wrap').onclick = e => { if (e.target.id === 'cal-wrap') $('cal-wrap').classList.remove('show'); };
 $('calPrev').onclick = () => { calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() - 1, 1); renderCalendar(); };
@@ -2360,7 +2618,9 @@ $('rSave').onclick = async () => {
     lng: geo ? geo.lng : null,
     team: $('rTeam').value,
     at: new Date($('rDate').value).toISOString(),
-    notes: $('rNotes').value.trim() || null
+    notes: $('rNotes').value.trim() || null,
+    user_id: session ? session.user.id : null,
+    created_by: profile ? profile.name : null
   }).select().single();
   spin(false);
   if (error) { hint('Erreur d\'enregistrement du rendez-vous'); return; }
@@ -2539,7 +2799,7 @@ async function renderManagerSection() {
   });
 }
 
-$('dashBtn').onclick = () => { $('dash-wrap').classList.add('show'); renderDashboard(); };
+$('dashBtn').onclick = () => { if (!session) { openAuthModal(); return; } $('dash-wrap').classList.add('show'); renderDashboard(); };
 $('dashClose').onclick = () => $('dash-wrap').classList.remove('show');
 $('dash-wrap').onclick = e => { if (e.target.id === 'dash-wrap') $('dash-wrap').classList.remove('show'); };
 document.querySelectorAll('.dash-period').forEach(b => b.onclick = () => {
@@ -2557,27 +2817,40 @@ $('auTeam').innerHTML = TEAMS.map(t => `<option>${t}</option>`).join('');
 async function initAuth() {
   const { data } = await db.auth.getSession();
   session = data.session;
+  document.body.classList.toggle('no-session', !session);
   if (session) await ensureProfile();
   else showLanding(); // pas connecté → page d'accueil
 }
 initAuth();
 
 /* ---- Page d'accueil ---- */
+let landingInit = false;
 function showLanding() {
   const ld = $('landing');
   ld.classList.add('show');
-  // compteurs animés
-  ld.querySelectorAll('[data-count]').forEach(el => {
+  if (landingInit) return;
+  landingInit = true;
+  // compteurs animés quand la bande de stats devient visible
+  const runCount = el => {
     const target = +el.dataset.count;
     const t0 = performance.now(), dur = 1800;
-    function tick(t) {
+    (function tick(t) {
       const p = Math.min(1, (t - t0) / dur);
       const eased = 1 - Math.pow(1 - p, 3);
       el.textContent = Math.round(target * eased).toLocaleString('fr-CA');
       if (p < 1) requestAnimationFrame(tick);
-    }
-    setTimeout(() => requestAnimationFrame(tick), 600);
-  });
+    })(performance.now());
+  };
+  // révélation au défilement
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      en.target.classList.add('on');
+      en.target.querySelectorAll('[data-count]').forEach(runCount);
+      io.unobserve(en.target);
+    });
+  }, { root: ld.querySelector('.ld-scroll'), threshold: 0.25 });
+  ld.querySelectorAll('.rv, .ld-band').forEach(el => io.observe(el));
 }
 function hideLanding() {
   const ld = $('landing');
@@ -2585,7 +2858,16 @@ function hideLanding() {
   setTimeout(() => { ld.classList.remove('show', 'leaving'); }, 650);
 }
 $('ldEnter').onclick = hideLanding;
+$('ldEnter2').onclick = hideLanding;
 $('ldLogin').onclick = () => { hideLanding(); setTimeout(openAuthModal, 400); };
+$('ldCreate').onclick = () => {
+  hideLanding();
+  setTimeout(() => {
+    openAuthModal();
+    const tab = document.querySelector('.auth-tab[data-tab="signup"]');
+    if (tab) tab.click();
+  }, 400);
+};
 
 async function ensureProfile() {
   const { data } = await db.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
@@ -2601,6 +2883,7 @@ async function ensureProfile() {
     profile = created || fallback;
     if (error) console.error('profil auto-créé localement seulement:', error);
   }
+  if (typeof updateProfileBtnAvatar === 'function') updateProfileBtnAvatar();
 }
 
 /* ---- Modal auth ---- */
@@ -2637,6 +2920,7 @@ $('auSubmit').onclick = async () => {
       session = data.session;
       await db.from('profiles').insert({ id: session.user.id, name, team: $('auTeam').value });
       await ensureProfile();
+      refreshAllData();
       $('auth-wrap').classList.remove('show');
       openTrackPanel();
     } else {
@@ -2649,6 +2933,7 @@ $('auSubmit').onclick = async () => {
     if (error) { $('authMsg').style.color = 'var(--red)'; $('authMsg').textContent = 'Courriel ou mot de passe invalide.'; return; }
     session = data.session;
     await ensureProfile();
+    refreshAllData();
     $('auth-wrap').classList.remove('show');
     openTrackPanel();
   }
@@ -2684,6 +2969,7 @@ $('auCodeVerify').onclick = async () => {
   session = data.session;
   await db.from('profiles').insert({ id: session.user.id, name: pendingSignup.name, team: pendingSignup.team });
   await ensureProfile();
+  refreshAllData();
   pendingSignup = null;
   showMainView();
   $('auth-wrap').classList.remove('show');
@@ -2717,20 +3003,51 @@ function haversineLL(a, b) { return haversine(a, b); } // réutilise la fonction
 function ensureLiveLayer() {
   if (map.getSource('live-track')) return;
   map.addSource('live-track', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  const incFilter = ['!=', ['coalesce', ['get', 'inc'], 1], 0];
   map.addLayer({ id: 'live-track-glow', type: 'line', source: 'live-track',
+    filter: incFilter,
     layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: { 'line-color': '#60a5fa', 'line-width': 10, 'line-opacity': 0.25, 'line-blur': 3 } });
   map.addLayer({ id: 'live-track-line', type: 'line', source: 'live-track',
+    filter: incFilter,
     layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: { 'line-color': '#60a5fa', 'line-width': 4 } });
+  // segments exclus pendant l'édition : rouge pointillé
+  map.addLayer({ id: 'live-track-off', type: 'line', source: 'live-track',
+    filter: ['==', ['coalesce', ['get', 'inc'], 1], 0],
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': '#fb7185', 'line-width': 3, 'line-dasharray': [2, 2], 'line-opacity': 0.8 } });
   map.addSource('live-doors', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addLayer({ id: 'live-doors-dot', type: 'circle', source: 'live-doors',
     paint: { 'circle-radius': 5, 'circle-color': '#fbbf24', 'circle-stroke-width': 2, 'circle-stroke-color': '#ffffff' } });
+}
+function setLiveColor(c) {
+  try {
+    map.setPaintProperty('live-track-glow', 'line-color', c);
+    map.setPaintProperty('live-track-line', 'line-color', c);
+  } catch (e) {}
 }
 function updateLiveLine() {
   if (!map.getSource('live-track') || !currentTrack) return;
   map.getSource('live-track').setData({ type: 'Feature', properties: {},
     geometry: { type: 'LineString', coordinates: currentTrack.points.map(p => [p.lng, p.lat]) } });
+}
+
+/* ---- Point de position en direct (style Strava) ---- */
+let posMarker = null;
+function updatePosMarker(lat, lng, firstFix) {
+  if (!posMarker) {
+    const el = document.createElement('div');
+    el.className = 'live-pos';
+    el.innerHTML = '<div class="live-pos-ring"></div><div class="live-pos-dot"></div>';
+    posMarker = new maplibregl.Marker({ element: el }).setLngLat([lng, lat]).addTo(map);
+  } else {
+    posMarker.setLngLat([lng, lat]);
+  }
+  if (firstFix) map.flyTo({ center: [lng, lat], zoom: 16.5, duration: 1600, essential: true });
+}
+function removePosMarker() {
+  if (posMarker) { posMarker.remove(); posMarker = null; }
 }
 function updateLiveDoors() {
   if (!map.getSource('live-doors') || !currentTrack) return;
@@ -2812,7 +3129,9 @@ function onPosition(pos) {
     if (d / dt > 40) return;
     currentTrack.distanceM += d;
   }
+  const firstFix = currentTrack.points.length === 0;
   currentTrack.points.push({ lat, lng, t });
+  updatePosMarker(lat, lng, firstFix);
   updateLiveLine();
   detectStop(lat, lng, t);
   scheduleSave();
@@ -2854,6 +3173,7 @@ async function startTour() {
     if (error) { hint('Impossible de démarrer la tournée — ' + (error.message || 'erreur base de données')); console.error(error); return; }
     currentTrack = { id: data.id, points: [], distanceM: 0, pendingDoors: [], startedAt: data.started_at };
     dwell = null;
+    setLiveColor(teamColorOf(profile.team)); // trajet à la couleur de MON équipe
     if (navigator.geolocation) {
       startWatch();
       requestWakeLock();          // empêche l'écran de s'éteindre pendant la tournée
@@ -2898,6 +3218,7 @@ async function stopTour() {
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   watchId = null;
   releaseWakeLock();
+  removePosMarker();
   clearInterval(liveTicker);
   const endedAt = new Date().toISOString();
   await db.from('tracks').update({
@@ -2923,9 +3244,17 @@ function openTrackPanel() {
 $('trackClose').onclick = () => $('track-wrap').classList.remove('show');
 $('track-wrap').onclick = e => { if (e.target.id === 'track-wrap') $('track-wrap').classList.remove('show'); };
 
+let panelMode = 'tour'; // 'tour' | 'profile'
 $('trackBtn').onclick = async () => {
   if (!session) { openAuthModal(); return; }
   if (!profile) { await ensureProfile(); }
+  panelMode = 'tour';
+  openTrackPanel();
+};
+$('profileBtn').onclick = async () => {
+  if (!session) { openAuthModal(); return; }
+  if (!profile) { await ensureProfile(); }
+  panelMode = 'profile';
   openTrackPanel();
 };
 
@@ -2992,8 +3321,7 @@ function renderTrackPanel() {
     return;
   }
 
-  // état repos : PROFIL style Strava (avatar, stats, activités)
-  $('trackTitle').textContent = 'MON PROFIL';
+  // état repos : vue PROFIL ou vue TOURNÉE selon le bouton cliqué
   $('trackSub').textContent = profile ? `${profile.name} · ${profile.team}` : '—';
   const installTip = (IS_IOS && !IS_STANDALONE) ? `
     <div class="install-tip">
@@ -3001,12 +3329,42 @@ function renderTrackPanel() {
       Dans Safari : bouton <b>Partager</b> <span class="ios-share">⎋</span> → <b>« Sur l'écran d'accueil »</b>.
       L'app s'ouvre plein écran et la permission de localisation reste mémorisée.
     </div>` : '';
-  const initials = (profile?.name || '?').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  const isMgr = profile?.role === 'manager';
+  if (panelMode === 'profile') { renderProfileView(installTip); return; }
+
+  // ---- Vue TOURNÉE au repos : démarrer + mes activités ----
   $('trackBody').innerHTML = `
     ${installTip}
+    <div class="track-hero" style="padding:14px 10px 18px;">
+      <div class="lbl">PRÊT À PARTIR</div>
+    </div>
+    <button class="btn btn-primary" id="startTourBtn" style="width:100%;">▶ DÉMARRER MA TOURNÉE</button>
+    <div class="dash-section-title">Mes activités</div>
+    <div id="myTours"><div class="cal-empty">Chargement…</div></div>
+  `;
+  document.getElementById('startTourBtn').onclick = startTour;
+  renderMyTours();
+}
+
+/* ---- Vue PROFIL : photo, identité, mot de passe, stats ---- */
+function renderProfileView(installTip) {
+  $('trackTitle').textContent = 'MON PROFIL';
+  $('trackSub').textContent = profile ? `${profile.name} · ${profile.team}` : '—';
+  const initials = (profile?.name || '?').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const isMgr = profile?.role === 'manager';
+  const tc = teamColorOf(profile?.team);
+  const avatarInner = profile?.avatar_url
+    ? `<img src="${profile.avatar_url}" alt="">`
+    : initials;
+  $('trackBody').innerHTML = `
+    ${installTip || ''}
     <div class="pf-head">
-      <div class="pf-avatar" style="background:${teamColorOf(profile?.team)}22; color:${teamColorOf(profile?.team)}; border-color:${teamColorOf(profile?.team)};">${initials}</div>
+      <div class="pf-avatar" id="pfAvatar" style="background:${tc}22; color:${tc}; border-color:${tc};" title="Changer ma photo">
+        ${avatarInner}
+        <div class="pf-avatar-cam">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </div>
+      </div>
+      <input type="file" id="pfPhotoInput" accept="image/*" style="display:none;">
       <div class="pf-id">
         <div class="pf-name">${profile?.name || '—'}</div>
         <div class="pf-meta">${profile?.team || ''} ${isMgr ? '<span class="pf-badge">MANAGER</span>' : ''}</div>
@@ -3018,9 +3376,9 @@ function renderTrackPanel() {
         <div class="field"><label>Prénom</label><input id="pfName" type="text" value="${profile?.name || ''}"></div>
         <div class="field"><label>Équipe</label><select id="pfTeam">${TEAMS.map(t => `<option ${t === profile?.team ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
       </div>
+      <div class="field"><label>Nouveau mot de passe (optionnel)</label><input id="pfPassword" type="password" placeholder="••••••••" autocomplete="new-password"></div>
       <button class="btn btn-primary" id="pfSaveBtn" style="width:100%; padding:10px;">ENREGISTRER</button>
     </div>
-    <button class="btn btn-primary" id="startTourBtn" style="width:100%;">▶ DÉMARRER MA TOURNÉE</button>
     <div class="pf-stats" id="pfStats">
       <div class="pf-stat"><div class="v">—</div><div class="k">Tournées</div></div>
       <div class="pf-stat"><div class="v">—</div><div class="k">Kilomètres</div></div>
@@ -3028,14 +3386,12 @@ function renderTrackPanel() {
     </div>
     <div class="dash-section-title">8 dernières semaines</div>
     <div class="pf-weeks" id="pfWeeks"></div>
-    <div class="dash-section-title">Mes activités</div>
-    <div id="myTours"><div class="cal-empty">Chargement…</div></div>
-    <button class="btn btn-ghost" id="logoutBtn" style="width:100%; margin-top:14px;">SE DÉCONNECTER</button>
+    <button class="btn btn-ghost" id="logoutBtn" style="width:100%; margin-top:18px;">SE DÉCONNECTER</button>
   `;
-  document.getElementById('startTourBtn').onclick = startTour;
   document.getElementById('logoutBtn').onclick = async () => {
     await db.auth.signOut();
     session = null; profile = null;
+    clearAllData();
     $('track-wrap').classList.remove('show');
     showLanding();
   };
@@ -3046,29 +3402,81 @@ function renderTrackPanel() {
   document.getElementById('pfSaveBtn').onclick = async () => {
     const name = document.getElementById('pfName').value.trim();
     const team = document.getElementById('pfTeam').value;
+    const pwd = document.getElementById('pfPassword').value;
     if (!name) return;
     const { error } = await db.from('profiles').update({ name, team }).eq('id', session.user.id);
     if (error) { hint('Erreur de mise à jour du profil'); return; }
+    if (pwd) {
+      if (pwd.length < 6) { hint('Mot de passe : 6 caractères minimum'); return; }
+      const { error: pe } = await db.auth.updateUser({ password: pwd });
+      if (pe) { hint('Erreur de changement de mot de passe'); return; }
+    }
     profile.name = name; profile.team = team;
     localStorage.setItem('team', team);
     $('teamSelect').value = team;
     renderTrackPanel();
-    hint('<span class="k">✓</span> Profil mis à jour');
+    hint('<span class="k">✓</span> Profil mis à jour' + (pwd ? ' (mot de passe changé)' : ''));
   };
-  renderMyTours();
+  // photo de profil
+  const photoInput = document.getElementById('pfPhotoInput');
+  document.getElementById('pfAvatar').onclick = () => photoInput.click();
+  photoInput.onchange = async () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+    spin(true);
+    try {
+      const img = await new Promise((res, rej) => {
+        const i = new Image();
+        i.onload = () => res(i); i.onerror = rej;
+        i.src = URL.createObjectURL(file);
+      });
+      const size = 256, c = document.createElement('canvas');
+      c.width = c.height = size;
+      const s = Math.min(img.width, img.height);
+      c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.85));
+      const path = `${session.user.id}.jpg`;
+      const { error: ue } = await db.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+      if (ue) throw ue;
+      const { data: pub } = db.storage.from('avatars').getPublicUrl(path);
+      const url = pub.publicUrl + '?t=' + Date.now();
+      await db.from('profiles').update({ avatar_url: url }).eq('id', session.user.id);
+      profile.avatar_url = url;
+      updateProfileBtnAvatar();
+      renderTrackPanel();
+      hint('<span class="k">✓</span> Photo de profil mise à jour');
+    } catch (e) {
+      console.error('avatar:', e);
+      hint('Impossible de téléverser la photo');
+    } finally { spin(false); }
+  };
+  renderMyTours(); // remplit les stats cumulées et les barres hebdo
+}
+
+/* petit avatar dans la barre du haut */
+function updateProfileBtnAvatar() {
+  const holder = document.getElementById('profileBtnAvatar');
+  const icon = document.getElementById('profileBtnIcon');
+  if (profile?.avatar_url) {
+    holder.innerHTML = `<img src="${profile.avatar_url}" alt="" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">`;
+    holder.style.display = 'block';
+    icon.style.display = 'none';
+  } else {
+    holder.style.display = 'none';
+    icon.style.display = 'block';
+  }
 }
 
 /* ---- Profil : stats cumulées, barres hebdo, activités (sync téléphone ↔ ordi) ---- */
 async function renderMyTours() {
-  const box = document.getElementById('myTours');
-  if (!box || !session) return;
+  if (!session) return;
   const [{ data: tracks }, { data: doorRows }] = await Promise.all([
     db.from('tracks').select('id,started_at,ended_at,distance_m,points,status')
       .eq('user_id', session.user.id).eq('status', 'done')
       .order('started_at', { ascending: false }).limit(100),
     db.from('doors').select('track_id').eq('user_id', session.user.id).eq('confirmed', true)
   ]);
-  if (!document.getElementById('myTours')) return; // panneau changé entre-temps
+  const box = document.getElementById('myTours'); // peut être absent (vue profil)
   const doorCount = {};
   (doorRows || []).forEach(d => { doorCount[d.track_id] = (doorCount[d.track_id] || 0) + 1; });
   const list = tracks || [];
@@ -3106,6 +3514,7 @@ async function renderMyTours() {
       </div>`).join('');
   }
 
+  if (!box) return; // vue profil : stats seulement
   if (!list.length) { box.innerHTML = `<div class="cal-empty">Aucune tournée terminée pour l'instant.</div>`; return; }
   box.innerHTML = list.map(t => {
     const d = new Date(t.started_at);
@@ -3178,7 +3587,7 @@ async function showRecapFor(track, opts = {}) {
   $('trackSub').textContent = fresh ? 'Récap de ta tournée' : 'Tournée du ' + new Date(start).toLocaleDateString('fr-CA');
   $('trackBody').innerHTML = `
     <div class="recap-card">
-      <div class="recap-title">🏁 ${fresh ? 'Tournée terminée' : 'Récap de tournée'}</div>
+      <div class="recap-title">${fresh ? 'Tournée terminée' : 'Récap de tournée'}</div>
       <div class="recap-date">${new Date(start).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' })} · ${new Date(start).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})}</div>
       <div class="recap-grid">
         <div class="recap-stat"><div class="v">${doors.length}</div><div class="k">Portes confirmées</div></div>
@@ -3192,7 +3601,11 @@ async function showRecapFor(track, opts = {}) {
         <div class="door-addr">${d.address || 'Adresse inconnue'}</div>
         <div class="door-time">${new Date(d.detected_at).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'})}</div>
       </div></div>`).join('') : ''}
-    <button class="btn btn-primary" id="viewRouteBtn" style="width:100%; margin-top:14px;">🗺 VOIR LE TRAJET SUR LA CARTE</button>
+    <button class="btn btn-primary" id="viewRouteBtn" style="width:100%; margin-top:14px;">VOIR LE TRAJET SUR LA CARTE</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="btn btn-ghost" id="editRouteBtn" style="flex:1;">MODIFIER LE TRAJET</button>
+      <button class="btn btn-ghost" id="shareRecapBtn" style="flex:1;">PARTAGER</button>
+    </div>
     ${fresh
       ? '<button class="btn btn-ghost" id="newTourBtn" style="width:100%; margin-top:10px;">NOUVELLE TOURNÉE</button>'
       : '<button class="btn btn-ghost" id="backToursBtn" style="width:100%; margin-top:10px;">← RETOUR À MES TOURNÉES</button>'}
@@ -3202,12 +3615,167 @@ async function showRecapFor(track, opts = {}) {
   document.getElementById('viewRouteBtn').onclick = () => {
     drawRoute(points);
     $('track-wrap').classList.remove('show'); // referme la feuille pour voir la carte
-    hint('Trajet affiché — rouvre 🏃 pour revenir à tes tournées');
+    hint('Trajet affiché — rouvre le panneau tournée pour revenir');
   };
+  document.getElementById('editRouteBtn').onclick = () => openTrackEditor(track, { fresh });
+  document.getElementById('shareRecapBtn').onclick = () => shareRecapImage(track, { doors: doors.length, km, dur: fmtDuration(durMs), streets: streets.size, start });
   const nb = document.getElementById('newTourBtn');
   if (nb) nb.onclick = () => { currentTrack = null; reviewDoors = null; clearLiveLayers(); renderTrackPanel(); };
   const bb = document.getElementById('backToursBtn');
   if (bb) bb.onclick = () => { clearLiveLayers(); renderTrackPanel(); };
+}
+
+/* ---- Éditeur de trajet : exclure des segments en un geste ---- */
+function splitSegmentsIdx(points) {
+  const ranges = [];
+  let a = 0;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1], p = points[i];
+    if (haversine({ lat: prev.lat, lng: prev.lng }, { lat: p.lat, lng: p.lng }) > 200) {
+      if (i - 1 > a) ranges.push([a, i - 1]);
+      a = i;
+    }
+  }
+  if (points.length - 1 > a) ranges.push([a, points.length - 1]);
+  return ranges;
+}
+function segStats(points, [a, b]) {
+  let m = 0;
+  for (let i = a + 1; i <= b; i++) m += haversine({ lat: points[i-1].lat, lng: points[i-1].lng }, { lat: points[i].lat, lng: points[i].lng });
+  return { m, t0: new Date(points[a].t), t1: new Date(points[b].t) };
+}
+
+function openTrackEditor(track, opts = {}) {
+  const points = track.points || [];
+  const ranges = splitSegmentsIdx(points);
+  if (!ranges.length) { hint('Aucun segment à modifier sur ce trajet'); return; }
+  const included = ranges.map(() => true);
+
+  function preview() {
+    try {
+      ensureLiveLayer();
+      map.getSource('live-track').setData({ type: 'FeatureCollection',
+        features: ranges.map(([a, b], i) => ({
+          type: 'Feature', properties: { inc: included[i] ? 1 : 0 },
+          geometry: { type: 'LineString', coordinates: points.slice(a, b + 1).map(p => [p.lng, p.lat]) }
+        })) });
+    } catch (e) {}
+  }
+
+  $('trackSub').textContent = 'Touchez un segment pour l\'exclure';
+  $('trackBody').innerHTML = `
+    <div class="dash-section-title" style="margin-top:0;">Segments du trajet</div>
+    <div id="segList">
+      ${ranges.map((r, i) => {
+        const s = segStats(points, r);
+        const hh = d => d.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+        return `<div class="seg-row" data-i="${i}">
+          <div class="seg-dot" style="background:${teamColorOf(profile?.team)}"></div>
+          <div class="seg-body">
+            <div class="seg-name">Segment ${i + 1} — ${(s.m/1000).toFixed(2)} km</div>
+            <div class="seg-time">${hh(s.t0)} → ${hh(s.t1)}</div>
+          </div>
+          <div class="seg-toggle on">INCLUS</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button class="btn btn-ghost" id="segCancel" style="flex:1;">ANNULER</button>
+      <button class="btn btn-primary" id="segSave" style="flex:1;">ENREGISTRER</button>
+    </div>
+  `;
+  preview();
+
+  $('trackBody').querySelectorAll('.seg-row').forEach(row => row.onclick = () => {
+    const i = +row.dataset.i;
+    included[i] = !included[i];
+    const tog = row.querySelector('.seg-toggle');
+    tog.classList.toggle('on', included[i]);
+    tog.textContent = included[i] ? 'INCLUS' : 'EXCLU';
+    row.classList.toggle('seg-off', !included[i]);
+    preview();
+  });
+  document.getElementById('segCancel').onclick = () => showRecapFor(track, opts);
+  document.getElementById('segSave').onclick = async () => {
+    if (!included.some(Boolean)) { hint('Garde au moins un segment'); return; }
+    const newPoints = [];
+    let newDist = 0;
+    ranges.forEach(([a, b], i) => {
+      if (!included[i]) return;
+      newPoints.push(...points.slice(a, b + 1));
+      newDist += segStats(points, [a, b]).m;
+    });
+    spin(true);
+    const { error } = await db.from('tracks').update({ points: newPoints, distance_m: Math.round(newDist) }).eq('id', track.id);
+    spin(false);
+    if (error) { hint('Erreur d\'enregistrement du trajet'); return; }
+    track.points = newPoints;
+    track.distance_m = Math.round(newDist);
+    if (currentTrack && currentTrack.id === track.id) { currentTrack.points = newPoints; currentTrack.distanceM = newDist; }
+    hint('<span class="k">✓</span> Trajet mis à jour');
+    showRecapFor(track, opts);
+  };
+}
+
+/* ---- Carte-résumé partageable (image générée) ---- */
+async function shareRecapImage(track, s) {
+  spin(true);
+  try {
+    drawRoute(track.points || []);
+    await new Promise(r => { let done = false; map.once('idle', () => { done = true; r(); }); setTimeout(() => { if (!done) r(); }, 2500); });
+    const mapImg = new Image();
+    mapImg.src = map.getCanvas().toDataURL('image/jpeg', 0.9);
+    await new Promise(r => { mapImg.onload = r; });
+
+    const W = 1080, H = 1350;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    x.fillStyle = '#0d1216'; x.fillRect(0, 0, W, H);
+    // en-tête
+    x.fillStyle = '#6ee7b7'; x.font = '700 44px Space Grotesk, sans-serif';
+    x.fillText('TERRITOIRE', 64, 96);
+    x.fillStyle = '#8b98a5'; x.font = '400 30px Space Grotesk, sans-serif';
+    const d = new Date(s.start);
+    x.fillText(`${profile?.name || ''} · ${profile?.team || ''}`, 64, 148);
+    x.fillText(d.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' }), 64, 190);
+    // carte (recadrée au centre, coins arrondis)
+    const mh = 700, my = 230;
+    x.save();
+    x.beginPath();
+    if (x.roundRect) x.roundRect(64, my, W - 128, mh, 28); else x.rect(64, my, W - 128, mh);
+    x.clip();
+    const scale = Math.max((W - 128) / mapImg.width, mh / mapImg.height);
+    const dw = mapImg.width * scale, dh = mapImg.height * scale;
+    x.drawImage(mapImg, 64 + (W - 128 - dw) / 2, my + (mh - dh) / 2, dw, dh);
+    x.restore();
+    // stats
+    const stats = [[String(s.doors), 'PORTES'], [s.km + ' km', 'DISTANCE'], [s.dur, 'DURÉE'], [String(s.streets), 'RUES']];
+    const cw = (W - 128) / 4;
+    stats.forEach(([v, k], i) => {
+      const cx = 64 + i * cw;
+      x.fillStyle = '#e7f0ea'; x.font = '700 58px JetBrains Mono, monospace';
+      x.fillText(v, cx, my + mh + 110);
+      x.fillStyle = '#8b98a5'; x.font = '400 24px Space Grotesk, sans-serif';
+      x.fillText(k, cx, my + mh + 152);
+    });
+    x.fillStyle = '#34d399'; x.font = '400 26px Space Grotesk, sans-serif';
+    x.fillText('Chaque porte compte.', 64, H - 72);
+
+    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    const file = new File([blob], 'ma-tournee.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Ma tournée TERRITOIRE' });
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'ma-tournee.png';
+      a.click();
+      hint('<span class="k">✓</span> Image téléchargée');
+    }
+  } catch (e) {
+    console.error('share:', e);
+    hint('Impossible de générer l\'image');
+  } finally { spin(false); }
 }
 
 // compatibilité : le bouton "VOIR MON RÉCAP →" après une tournée fraîche
